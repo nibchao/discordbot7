@@ -180,11 +180,11 @@ client.once("ready", () =>
 
     // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
     // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205 // 1⃣
-    var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
+    /*var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
     roleChannel.send('react role test').then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
     sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
     sent.react("4⃣")).then(() => sent.react("5⃣")).then(() => sent.react("6⃣")).then(() =>
-    sent.react("7⃣")).then(() => sent.react("8⃣")).then(() => sent.react("9⃣")).catch(() => console.error('emoji failed to react.')); });
+    sent.react("7⃣")).then(() => sent.react("8⃣")).then(() => sent.react("9⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
     checkStreamerNotificationRoles();
     startLiveCheck();
@@ -284,7 +284,7 @@ for (var cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemor
 }
 
 const roleMissing = [];
-const roleFound = [];
+const roleFound = ['ekun7'];
 function checkStreamerNotificationRoles()
 {
   for (var cnt = 0; cnt < streamers.length; cnt++)
@@ -299,8 +299,15 @@ function checkStreamerNotificationRoles()
       roleFound.push(streamers[cnt]);
     }
   }
-
-  console.log(`${roleMissing} roles were ` + '\x1b[35m%s\x1b[0m', 'not found\x1b[0m' + '. No live announcement for these streamers.');
+ 
+  if (roleMissing.length == 0)
+  {
+    console.log('No roles were missing.');
+  }
+  else
+  {
+    console.log(`${roleMissing} roles were ` + '\x1b[35m%s\x1b[0m', 'not found\x1b[0m' + '. No live announcement for these streamers.');
+  }
   console.log('----------');
   console.log(`${roleFound} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '! Live announcements enabled for these streamers.');
   console.log('---------------------------');
