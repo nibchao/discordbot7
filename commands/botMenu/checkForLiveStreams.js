@@ -1,3 +1,4 @@
+// https://www.npmjs.com/package/node-twitch
 const TwitchApi = require('node-twitch').default;
 const twitchCredentials = require('../../credentials/twitchCredentials.json');
 

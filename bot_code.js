@@ -2,10 +2,6 @@
 const { Client, Intents, Message, Permissions, GuildEmojiRoleManager, MessageEmbed, Partials } = require("discord.js");
 const { token, clientID, guildID } = require("./credentials/discordCredentials.json");
 
-// https://www.npmjs.com/package/node-twitch
-// const TwitchApi = require('node-twitch').default;
-// const twitchCredentials = require('./credentials/twitchCredentials.json');
-
 // https://www.npmjs.com/package/youtube-api
 // const YoutubeApi = require('youtube-api');
 // const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
@@ -35,9 +31,7 @@ const client = new Client
   ]
 });
 
-
-// https://stackoverflow.com/a/65729237, could switch to reactionCollector instead https://discordjs.guide/popular-topics/collectors.html#reaction-collectors and https://stackoverflow.com/a/60754621
-// as is right now, adding the pogchamping emote reaction from my emote server will add 'nnabi role' so need to limit it to only in #role channel
+// https://stackoverflow.com/a/65729237
 client.on('messageReactionAdd', async (reaction, user) =>
 {
   if (reaction.partial)
@@ -134,12 +128,6 @@ client.on('messageReactionRemove', async (reaction, user) =>
   }
 })
 
-// const twitch = new TwitchApi
-// ({
-//   client_id: twitchCredentials.client_id, 
-//   client_secret: twitchCredentials.client_secret
-// });
-
 // const oauth = YoutubeApi.authenticate
 // ({
 //   type: "oauth", 
@@ -190,9 +178,9 @@ client.once("ready", () =>
     startLiveCheck();
 });
 
-// eventually add option to add more youtube channels for notifications, view emote requests that were written to a file or a channel (if possible), could add option to create roles (won't though because it's easier to customize all aspects in discord)
-// add check for if streamerList.txt file exists; if not, create empty .txt file named streamerList in same directory
-/*async function botMenu() // add this when i get basic functionality to work first
+// add option to: add youtube channels for notifications, view emote requests written to a file/channel, create twitch notification roles
+// check for if streamerList.txt file exists; if not, say that streamerList.txt must be created in same directory; maybe edit menu to display twitch notification option only if streamerList.txt exists
+async function botMenu()
 {
   do
   {
@@ -233,10 +221,10 @@ client.once("ready", () =>
     } 
   }
   while (menuChoice !== '5');
-}*/
+}
 
 // https://nodejs.org/api/tty.html, https://gist.github.com/newvertex/d78b9c6050d6a8f830809e6e528d5e96, https://thisdavej.com/making-interactive-node-js-console-apps-that-listen-for-keypress-events/
-/*function startBot()
+function startBot()
 {
   readline.emitKeypressEvents(process.stdin);
   if (process.stdin.isTTY)
@@ -263,7 +251,7 @@ client.once("ready", () =>
       }
     })
   })
-}*/
+}
 
 const liveMemory = [];
 const streamers = [];
@@ -338,14 +326,6 @@ client.on('messageCreate', async(message) =>
   {
     return;
   }
-
-  /*if (message.channel.name === "role") // just to make bot send message in channel to test reactions
-  {
-    message.channel.send('test').then(function(sentMessage) 
-    {
-      sentMessage.react('👍').then(() => sentMessage.react('👎')).catch(() => console.error('emoji failed to react.'));
-    });
-  }*/
 
   // make kick/ban use discord's built in kick()/ban() functions
   if (command === 'kick')
