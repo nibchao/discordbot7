@@ -32,109 +32,6 @@ const client = new Client
   ]
 });
 
-// https://stackoverflow.com/a/65729237
-client.on('messageReactionAdd', async (reaction, user) =>
-{
-  if (reaction.partial)
-  {
-    try
-    {
-      await reaction.fetch();
-    }
-    catch (error)
-    {
-      console.error(error);
-      return;
-    }
-  }
-  if (user.bot === false)
-  {
-    if (reaction.message.id != roleMessageID)
-    {
-        return;
-    }
-    const mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
-    const memberUsername = mem.displayName;
-    var role;
-    // need a way to catch error if role name doesn't exist; try-catch block doesn't work or what i tried before didn't work because TypeError gets thrown if role name doesn't exist
-    if (reaction.emoji.name === "1⃣") // if '1' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
-    }
-    else if (reaction.emoji.name == "2⃣") // if '2' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[1] + notificationRoleSuffix);
-    }
-    else if (reaction.emoji.name == "3⃣") // if '3' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[2] + notificationRoleSuffix);
-    }
-    else if (reaction.emoji.name == "4⃣") // if '4' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[3] + notificationRoleSuffix);
-    }
-    else
-    {
-      console.log(`${memberUsername} tried to add a role, but a role was missing for the emoji reaction(s).`);
-      return;
-    }
-    var roleName = role.name;
-    console.log(`${memberUsername} added ${roleName} role.`);
-    mem.roles.add(role);
-  }
-})
-
-client.on('messageReactionRemove', async (reaction, user) =>
-{
-  if (reaction.partial)
-  {
-    try
-    {
-      await reaction.fetch();
-    }
-    catch (error)
-    {
-      console.error(error);
-      return;
-    }
-  }
-  if (user.bot === false)
-  {
-    if (reaction.message.id != roleMessageID)
-    {
-      return;
-    }
-    const mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
-    const memberUsername = mem.displayName;
-    var role;
-    // need a way to catch error if role name doesn't exist; try-catch block doesn't work or what i tried before didn't work because TypeError gets thrown if role name doesn't exist
-    if (reaction.emoji.name === "1⃣") // if '1' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
-    }
-    else if (reaction.emoji.name == "2⃣") // if '2' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[1] + notificationRoleSuffix);
-    }
-    else if (reaction.emoji.name == "3⃣") // if '3' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[2] + notificationRoleSuffix);
-    }
-    else if (reaction.emoji.name == "4⃣") // if '4' reaction
-    {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[3] + notificationRoleSuffix);
-    }
-    else
-    {
-      console.log(`${memberUsername} tried to remove a role, but a role was missing for the emoji reaction(s).`);
-      return;
-    }
-    var roleName = role.name;
-    console.log(`${memberUsername} removed ${roleName} role.`);
-    mem.roles.remove(role);
-  }
-})
-
 // const oauth = YoutubeApi.authenticate
 // ({
 //   type: "oauth", 
@@ -175,10 +72,14 @@ client.once("ready", () =>
 
     // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
     // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205 // 1⃣
-    var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
-    roleChannel.send('react role test').then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+    /*var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
+    roleChannel.send(`**Twitch Notification Roles**\n 1⃣ ${streamersNoMarkDown[0]}${notificationRoleSuffix} 
+    \n 2⃣ ${streamersNoMarkDown[1]}${notificationRoleSuffix} 
+    \n 3⃣ ${streamersNoMarkDown[2]}${notificationRoleSuffix} 
+    \n 4⃣ ${streamersNoMarkDown[3]}${notificationRoleSuffix}
+    \n 5⃣ ${streamersNoMarkDown[4]}${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
     sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-    sent.react("4⃣")).catch(() => console.error('emoji failed to react.')); });
+    sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
     /*then(() => sent.react("5⃣")).then(() => sent.react("6⃣")).then(() =>
     sent.react("7⃣")).then(() => sent.react("8⃣")).then(() => sent.react("9⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
@@ -263,6 +164,7 @@ function startBot()
 
 const liveMemory = [];
 const streamers = [];
+const streamersNoMarkDown = [];
 readline.createInterface // https://stackoverflow.com/a/12299566 / https://stackoverflow.com/a/41407246 for text color reference
 (
   {
@@ -271,6 +173,9 @@ readline.createInterface // https://stackoverflow.com/a/12299566 / https://stack
   }
 ).on('line', function(line)
 {
+  // const noDiscordMarkdownUsername = displayName.replaceAll('_', '*_*');
+  var x = line.replaceAll('_',  '*_*');
+  streamersNoMarkDown.push(x);
   streamers.push(line); // this pushes the streamer usernames from the .txt into streamers array
 });
 
@@ -368,6 +273,117 @@ client.on('messageCreate', async(message) =>
     {
       message.channel.send(`<@${message.member.id}>, you do not have permission to use this command.`);
     }
+  }
+})
+
+// https://stackoverflow.com/a/65729237
+client.on('messageReactionAdd', async (reaction, user) =>
+{
+  if (reaction.partial)
+  {
+    try
+    {
+      await reaction.fetch();
+    }
+    catch (error)
+    {
+      console.error(error);
+      return;
+    }
+  }
+  if (user.bot === false)
+  {
+    if (reaction.message.id != roleMessageID)
+    {
+        return;
+    }
+    const mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
+    const memberUsername = mem.displayName;
+    var role;
+    // need a way to catch error if role name doesn't exist; try-catch block doesn't work or what i tried before didn't work because TypeError gets thrown if role name doesn't exist
+    if (reaction.emoji.name === "1⃣") // if '1' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "2⃣") // if '2' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[1] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "3⃣") // if '3' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[2] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "4⃣") // if '4' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[3] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "5⃣") // if '5' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[4] + notificationRoleSuffix);
+    }
+    else
+    {
+      console.log(`${memberUsername} tried to add a role, but a role was missing for the emoji reaction(s).`);
+      return;
+    }
+    var roleName = role.name;
+    console.log(`${memberUsername} added "${roleName}" role.`);
+    mem.roles.add(role);
+  }
+})
+
+client.on('messageReactionRemove', async (reaction, user) =>
+{
+  if (reaction.partial)
+  {
+    try
+    {
+      await reaction.fetch();
+    }
+    catch (error)
+    {
+      console.error(error);
+      return;
+    }
+  }
+  if (user.bot === false)
+  {
+    if (reaction.message.id != roleMessageID)
+    {
+      return;
+    }
+    const mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
+    const memberUsername = mem.displayName;
+    var role;
+    // need a way to catch error if role name doesn't exist; try-catch block doesn't work or what i tried before didn't work because TypeError gets thrown if role name doesn't exist
+    if (reaction.emoji.name === "1⃣") // if '1' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "2⃣") // if '2' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[1] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "3⃣") // if '3' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[2] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "4⃣") // if '4' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[3] + notificationRoleSuffix);
+    }
+    else if (reaction.emoji.name == "5⃣") // if '5' reaction
+    {
+      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[4] + notificationRoleSuffix);
+    }
+    else
+    {
+      console.log(`${memberUsername} tried to remove a role, but a role was missing for the emoji reaction(s).`);
+      return;
+    }
+    var roleName = role.name;
+    console.log(`${memberUsername} removed "${roleName}" role.`);
+    mem.roles.remove(role);
   }
 })
 
