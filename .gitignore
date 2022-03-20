@@ -2,3 +2,4 @@ credentials/discordCredentials.json
 credentials/twitchCredentials.json
 credentials/youtubeCredentials.json
 node_modules/
+credentials/
