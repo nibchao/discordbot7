@@ -12,8 +12,8 @@ const fs = require('fs');
 const readline = require('readline');
 
 var menuCommands = require('./commands/botMenu/menuFunctions.js');
-const { resolve } = require("path");
-const { memoryUsage } = require("process");
+const { resolve } = require("path"); // somehow related to botmenu stuff?
+const { memoryUsage } = require("process"); // somehow related to botmenu stuff?
 
 const commandPrefix = '!';
 const notificationRoleSuffix = ' role';
@@ -60,15 +60,35 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
-    // https://discord.js.org/#/docs/discord.js/stable/class/RoleManager?scrollTo=create
-    /*currentGuild.roles.create({
-      name: 'chodan_ role',
-      //color: 'BLUE',
-      //reason: 'testing bot creating roles',
-    }).then(console.log).catch(console.error);*/
-
     //startBot();
     //botMenu();
+
+    console.log('Checking streamerList.txt for any missing roles.');
+    // checks if all roles in streamerList.txt exist, if not then creates
+    // https://discord.js.org/#/docs/discord.js/stable/class/RoleManager?scrollTo=create
+    var roleCheck, roleCheckCount = 0;
+    for (var cnt = 0; cnt < streamers.length; cnt++)
+    {
+        roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]}${notificationRoleSuffix}`);
+        if (roleCheck === undefined)
+        {
+          console.log(`${streamers[cnt]}${notificationRoleSuffix} was missing, creating a Discord role.`);
+          currentGuild.roles.create({
+            name: `${streamers[cnt]}${notificationRoleSuffix}`,
+            //color: 'BLUE',
+            //reason: 'testing bot creating roles',
+          }).catch(console.error);
+        }
+        else
+        {
+          roleCheckCount++;
+        }
+    }
+
+    if (roleCheckCount == streamers.length)
+    {
+      console.log('No streamerList.txt roles were missing.');
+    }
 
     // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
     // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205
@@ -83,8 +103,8 @@ client.once("ready", () =>
     sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
     sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
-    checkStreamerNotificationRoles();
-    startLiveCheck();
+    //checkStreamerNotificationRoles();
+    //startLiveCheck();
 });
 
 // add option to: add youtube channels for notifications, view emote requests written to a file/channel, create twitch notification roles
