@@ -1,1 +1,1 @@
-web: node ./bot_code.js
+worker: npm run start
