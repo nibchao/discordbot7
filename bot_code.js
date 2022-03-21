@@ -8,14 +8,15 @@ const { token, clientID, guildID } = require("./credentials/discordCredentials.j
 
 var test456 = require('./commands/botMenu/checkForLiveStreams.js');
 
-const commandPrefix = '!';
-const notificationRoleSuffix = ' role';
 const fs = require('fs');
 const readline = require('readline');
 
 var menuCommands = require('./commands/botMenu/menuFunctions.js');
 const { resolve } = require("path");
 const { memoryUsage } = require("process");
+
+const commandPrefix = '!';
+const notificationRoleSuffix = ' role';
 
 const client = new Client
 ({intents: 
@@ -67,11 +68,12 @@ client.once("ready", () =>
     }).then(console.log).catch(console.error);*/
 
     //startBot();
-
     //botMenu();
 
     // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
-    // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205 // 1⃣
+    // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205
+    // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
+    // https://stackoverflow.com/questions/65968094/get-last-message-from-text-channel-with-discord-js make below run only if most recent X messages don't contain "twitch notification roles"
     /*var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
     roleChannel.send(`**Twitch Notification Roles**\n 1⃣ ${streamersNoMarkDown[0]}${notificationRoleSuffix} 
     \n 2⃣ ${streamersNoMarkDown[1]}${notificationRoleSuffix} 
@@ -80,8 +82,6 @@ client.once("ready", () =>
     \n 5⃣ ${streamersNoMarkDown[4]}${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
     sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
     sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
-    /*then(() => sent.react("5⃣")).then(() => sent.react("6⃣")).then(() =>
-    sent.react("7⃣")).then(() => sent.react("8⃣")).then(() => sent.react("9⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
     checkStreamerNotificationRoles();
     startLiveCheck();
@@ -185,12 +185,12 @@ for (var cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemor
 }
 
 const roleMissing = [];
-const roleFound = ['ekun7'];
+const roleFound = ['ekun7']; // hardcoded to include my username by default
 function checkStreamerNotificationRoles()
 {
   for (var cnt = 0; cnt < streamers.length; cnt++)
   {
-    const roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} role`);
+    const roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]}${notificationRoleSuffix}`);
     if (roleID === undefined)
     {
       roleMissing.push(streamers[cnt]);
@@ -240,19 +240,18 @@ client.on('messageCreate', async(message) =>
     return;
   }
 
+  const target = message.mentions.users.first();
+  const reason = message.content.slice(command.length + 1).trim().split(/ +/g);
   // make kick/ban use discord's built in kick()/ban() functions
   if (command === 'kick')
   {
     if (message.member.permissions.has([Permissions.FLAGS.KICK_MEMBERS]))
     {
-      const target = message.mentions.users.first();
-      const reason = message.content.slice(command.length + 1).trim().split(/ +/g);
       if (target === undefined)
       {
         message.channel.send('Error: User not found or target was missing. Command format is !kick @<user> [optional reason].');
         return;
       }
-
       const memberID = message.guild.members.cache.get(target.id); 
       // Negative number if this role's position is lower (other role's is higher), positive number if this one is higher (other's is lower), 0 if equal
       if (message.member.roles.highest.comparePositionTo(message.mentions.members.first().roles.highest) <= 0)
@@ -267,6 +266,36 @@ client.on('messageCreate', async(message) =>
       else
       {
         message.channel.send(`${memberID} was kicked for ${reason[1]}.`);
+      }
+    }
+    else
+    {
+      message.channel.send(`<@${message.member.id}>, you do not have permission to use this command.`);
+    }
+  }
+  else if (command === 'ban')
+  {
+    if (message.member.permissions.has([Permissions.FLAGS.BAN_MEMBERS]))
+    {
+      if (target === undefined)
+      {
+        message.channel.send('Error: User not found or target was missing. Command format is !ban @<user> [optional reason].');
+        return;
+      }
+      const memberID = message.guild.members.cache.get(target.id); 
+      // Negative number if this role's position is lower (other role's is higher), positive number if this one is higher (other's is lower), 0 if equal
+      if (message.member.roles.highest.comparePositionTo(message.mentions.members.first().roles.highest) <= 0)
+      {
+        message.channel.send(`${memberID} has a higher role and could not be banned.`);
+        return;
+      }
+      if (reason[1] === undefined)
+      {
+        message.channel.send(`${memberID} was banned.`);
+      }
+      else
+      {
+        message.channel.send(`${memberID} was banned for ${reason[1]}.`);
       }
     }
     else
@@ -301,6 +330,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
     const memberUsername = mem.displayName;
     var role;
     // need a way to catch error if role name doesn't exist; try-catch block doesn't work or what i tried before didn't work because TypeError gets thrown if role name doesn't exist
+    // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     if (reaction.emoji.name === "1⃣") // if '1' reaction
     {
       role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
@@ -356,6 +386,7 @@ client.on('messageReactionRemove', async (reaction, user) =>
     const memberUsername = mem.displayName;
     var role;
     // need a way to catch error if role name doesn't exist; try-catch block doesn't work or what i tried before didn't work because TypeError gets thrown if role name doesn't exist
+    // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     if (reaction.emoji.name === "1⃣") // if '1' reaction
     {
       role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
