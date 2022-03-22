@@ -42,7 +42,7 @@ const client = new Client
 //   redirect_url: youtubeCredentials.redirect_uris
 // });
 
-var currentGuild, announceChannel, roleMessageID;
+var currentGuild, announceChannel, roleMessageID, roleChannel;
 client.once("ready", () =>
 {
     console.log(`Connected as ${client.user.tag}`);
@@ -50,6 +50,7 @@ client.once("ready", () =>
 
     currentGuild = client.guilds.cache.get(guildID);
     announceChannel = currentGuild.channels.cache.find(channel => channel.name === 'announce');
+    roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
 
     client.user.setPresence
     ({
@@ -91,18 +92,30 @@ client.once("ready", () =>
       console.log('No streamerList.txt roles were missing.');
     }
 
-    // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
-    // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205
-    // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
-    // https://stackoverflow.com/questions/65968094/get-last-message-from-text-channel-with-discord-js make below run only if most recent X messages don't contain "twitch notification roles"
-    /*var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
-    roleChannel.send(`**Twitch Notification Roles**\n 1⃣ ${streamersNoMarkDown[0]} ${notificationRoleSuffix} 
-    \n 2⃣ ${streamersNoMarkDown[1]} ${notificationRoleSuffix} 
-    \n 3⃣ ${streamersNoMarkDown[2]} ${notificationRoleSuffix} 
-    \n 4⃣ ${streamersNoMarkDown[3]} ${notificationRoleSuffix}
-    \n 5⃣ ${streamersNoMarkDown[4]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
-    sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-    sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
+    // get ID of that message to use for messageReactionAdd/Remove
+    // i'm not sure how to do this, but i wanted to first filter messages in #role by message content then getting the message id from these filtered messages to use
+    // for message reaction add/remove instead of hardcoding the role assign message ID manually
+    /*var x;
+    roleChannel.messages.fetch().then(messages => 
+    {
+      x = (messages.filter(m => m.content.includes('Twitch Notification Roles')));
+      console.log(x);
+    }).catch(console.error).then(() => console.log(''));*/
+
+    if (roleMessageID === undefined)
+    {
+      // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
+      // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205
+      // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣ - up to 20 reactions on a message
+      // https://stackoverflow.com/questions/65968094/get-last-message-from-text-channel-with-discord-js make below run only if most recent X messages don't contain "twitch notification roles"
+      /*roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[0]} ${notificationRoleSuffix} 
+      \n 2⃣ ${streamersNoMarkDown[1]} ${notificationRoleSuffix} 
+      \n 3⃣ ${streamersNoMarkDown[2]} ${notificationRoleSuffix} 
+      \n 4⃣ ${streamersNoMarkDown[3]} ${notificationRoleSuffix}
+      \n 5⃣ ${streamersNoMarkDown[4]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+      sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
+      sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
+    }
 
     //checkStreamerNotificationRoles();
     //startLiveCheck();
