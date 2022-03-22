@@ -18,6 +18,7 @@ const { memoryUsage } = require("process"); // somehow related to botmenu stuff?
 
 const commandPrefix = '!';
 const notificationRoleSuffix = 'role';
+const streamerList = 'streamerList.txt';
 
 const client = new Client
 ({intents: 
@@ -62,10 +63,7 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
-    //startBot();
-    //botMenu();
-
-    console.log('Checking streamerList.txt for any missing roles.');
+    console.log(`Checking ${streamerList} for any missing roles.`);
     // checks if all roles in streamerList.txt exist, if not then creates
     // https://discord.js.org/#/docs/discord.js/stable/class/RoleManager?scrollTo=create
     var roleCheck, roleCheckCount = 0;
@@ -89,7 +87,7 @@ client.once("ready", () =>
 
     if (roleCheckCount == streamers.length)
     {
-      console.log('No streamerList.txt roles were missing.');
+      console.log(`No ${streamerList} roles were missing.`);
     }
 
     // get ID of that message to use for messageReactionAdd/Remove
@@ -104,10 +102,9 @@ client.once("ready", () =>
 
     if (roleMessageID === undefined)
     {
-      // https://discordjs.guide/popular-topics/reactions.html#removing-reactions
-      // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205
+      // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205 
+      // https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json
       // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣ - up to 20 reactions on a message
-      // https://stackoverflow.com/questions/65968094/get-last-message-from-text-channel-with-discord-js make below run only if most recent X messages don't contain "twitch notification roles"
       /*roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[0]} ${notificationRoleSuffix} 
       \n 2⃣ ${streamersNoMarkDown[1]} ${notificationRoleSuffix} 
       \n 3⃣ ${streamersNoMarkDown[2]} ${notificationRoleSuffix} 
@@ -116,6 +113,23 @@ client.once("ready", () =>
       sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
       sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
     }
+
+    if (fs.existsSync(`./${streamerList}`))
+    {
+      console.log(`\n${streamerList} exists in bot_code.js directory, skipped creating file.\n`);
+    }
+    else
+    {
+      console.log(`${streamerList} was not found in bot_code.js directory, creating empty ${streamerList} file.`);
+      fs.writeFile(`${streamerList}`, '', function(err)
+      {
+        if (err) throw err;
+        console.log(`${streamerList} was created in bot_code.js directory.\n`);
+      });
+    }
+
+    //startBot();
+    //botMenu();
 
     //checkStreamerNotificationRoles();
     //startLiveCheck();
@@ -131,16 +145,16 @@ async function botMenu()
     switch(menuChoice)
     {
       case '0':
-        console.log('Printing contents of streamerList.txt: \n');
+        console.log(`Printing contents of ${streamerList}: \n`);
         menuCommands.printStreamers();
         break;
       case '1':
-        console.log('Adding streamer to streamerList.txt: \n');
+        console.log(`Adding streamer to ${streamerList}: \n`);
         const addStreamerUsername = await menuCommands.getStreamerUsername();
         menuCommands.addStreamer(addStreamerUsername);
         break;
       case '2': // if there are two duplicate usernames that were manually added to streamerList.txt, there will be an issue with 1 empty line left in the list
-        console.log('Removing streamer from streamerList.txt: \n');
+        console.log(`Removing streamer from ${streamerList}: \n`);
         const removeStreamerUsername = await menuCommands.getStreamerUsername();
         menuCommands.removeStreamer(removeStreamerUsername);
         break;
@@ -202,7 +216,7 @@ const streamersNoMarkDown = [];
 readline.createInterface // https://stackoverflow.com/a/12299566 / https://stackoverflow.com/a/41407246 for text color reference
 (
   {
-    input: fs.createReadStream('./streamerList.txt'),
+    input: fs.createReadStream(`./${streamerList}`),
     terminal: false
   }
 ).on('line', function(line)
