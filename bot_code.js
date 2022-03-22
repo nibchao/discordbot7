@@ -1,6 +1,7 @@
 // https://discord.js.org/#/
 const { Client, Intents, Message, Permissions, GuildEmojiRoleManager, MessageEmbed, Partials } = require("discord.js");
-const { token, clientID, guildID } = require("./credentials/discordCredentials.json");
+//const { token, clientID, guildID } = require("./credentials/discordCredentials.json"); // uncomment this when uploading to main bot
+const { token, clientID, guildID } = require("./credentials/discordTestingBotCredentials.json"); // comment this when uploading to main bot
 
 // https://www.npmjs.com/package/youtube-api
 // const YoutubeApi = require('youtube-api');
@@ -16,7 +17,7 @@ const { resolve } = require("path"); // somehow related to botmenu stuff?
 const { memoryUsage } = require("process"); // somehow related to botmenu stuff?
 
 const commandPrefix = '!';
-const notificationRoleSuffix = ' role';
+const notificationRoleSuffix = 'role';
 
 const client = new Client
 ({intents: 
@@ -69,12 +70,12 @@ client.once("ready", () =>
     var roleCheck, roleCheckCount = 0;
     for (var cnt = 0; cnt < streamers.length; cnt++)
     {
-        roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]}${notificationRoleSuffix}`);
+        roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
         if (roleCheck === undefined)
         {
-          console.log(`${streamers[cnt]}${notificationRoleSuffix} was missing, creating a Discord role.`);
+          console.log(`${streamers[cnt]} ${notificationRoleSuffix} was missing, creating a Discord role for ${streamers[cnt]}.`);
           currentGuild.roles.create({
-            name: `${streamers[cnt]}${notificationRoleSuffix}`,
+            name: `${streamers[cnt]} ${notificationRoleSuffix}`,
             //color: 'BLUE',
             //reason: 'testing bot creating roles',
           }).catch(console.error);
@@ -94,12 +95,12 @@ client.once("ready", () =>
     // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205
     // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     // https://stackoverflow.com/questions/65968094/get-last-message-from-text-channel-with-discord-js make below run only if most recent X messages don't contain "twitch notification roles"
-    /*var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
-    roleChannel.send(`**Twitch Notification Roles**\n 1⃣ ${streamersNoMarkDown[0]}${notificationRoleSuffix} 
-    \n 2⃣ ${streamersNoMarkDown[1]}${notificationRoleSuffix} 
-    \n 3⃣ ${streamersNoMarkDown[2]}${notificationRoleSuffix} 
-    \n 4⃣ ${streamersNoMarkDown[3]}${notificationRoleSuffix}
-    \n 5⃣ ${streamersNoMarkDown[4]}${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+    /*var roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
+    roleChannel.send(`**Twitch Notification Roles**\n 1⃣ ${streamersNoMarkDown[0]} ${notificationRoleSuffix} 
+    \n 2⃣ ${streamersNoMarkDown[1]} ${notificationRoleSuffix} 
+    \n 3⃣ ${streamersNoMarkDown[2]} ${notificationRoleSuffix} 
+    \n 4⃣ ${streamersNoMarkDown[3]} ${notificationRoleSuffix}
+    \n 5⃣ ${streamersNoMarkDown[4]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
     sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
     sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
@@ -210,7 +211,7 @@ function checkStreamerNotificationRoles()
 {
   for (var cnt = 0; cnt < streamers.length; cnt++)
   {
-    const roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]}${notificationRoleSuffix}`);
+    const roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
     if (roleID === undefined)
     {
       roleMissing.push(streamers[cnt]);
@@ -353,23 +354,23 @@ client.on('messageReactionAdd', async (reaction, user) =>
     // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     if (reaction.emoji.name === "1⃣") // if '1' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[0]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "2⃣") // if '2' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[1] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[1]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "3⃣") // if '3' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[2] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[2]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "4⃣") // if '4' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[3] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[3]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "5⃣") // if '5' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[4] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[4]} ${notificationRoleSuffix}`);
     }
     else
     {
@@ -409,23 +410,23 @@ client.on('messageReactionRemove', async (reaction, user) =>
     // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     if (reaction.emoji.name === "1⃣") // if '1' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[0] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[0]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "2⃣") // if '2' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[1] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[1]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "3⃣") // if '3' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[2] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[2]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "4⃣") // if '4' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[3] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[3]} ${notificationRoleSuffix}`);
     }
     else if (reaction.emoji.name == "5⃣") // if '5' reaction
     {
-      role = reaction.message.guild.roles.cache.find(role => role.name === streamers[4] + notificationRoleSuffix);
+      role = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[4]} ${notificationRoleSuffix}`);
     }
     else
     {
