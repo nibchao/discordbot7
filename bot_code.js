@@ -356,7 +356,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
   }
   if (user.bot === false)
   {
-    if (reaction.message.id != roleMessageID)
+    //if (reaction.message.id != roleMessageID)
+    if (reaction.message.id === '955244733419098112') // temporarily hardcoded role message ID
     {
         return;
     }
@@ -412,7 +413,8 @@ client.on('messageReactionRemove', async (reaction, user) =>
   }
   if (user.bot === false)
   {
-    if (reaction.message.id != roleMessageID)
+    //if (reaction.message.id != roleMessageID)
+    if (reaction.message.id === '955244733419098112') // temporarily hardcoded role message ID
     {
       return;
     }
