@@ -8,7 +8,7 @@ const twitch = new TwitchApi
   client_secret: twitchCredentials.client_secret
 });
 
-const test123 = require('./streamLiveNotificationAnnounce.js');
+const announceLiveNotification = require('./streamLiveNotificationAnnounce.js');
 
 // https://stackoverflow.com/a/41407246 for text color reference
 async function Run(streamerUsername, currentGuild, announceChannel, liveMemory)
@@ -23,7 +23,7 @@ async function Run(streamerUsername, currentGuild, announceChannel, liveMemory)
         {
           if (liveMemory === false || liveMemory === undefined)
           {
-            test123(streamerUsername, currentGuild, announceChannel, liveMemory);
+            announceLiveNotification(streamerUsername, currentGuild, announceChannel, liveMemory);
             liveMemory = true;
           }
           else

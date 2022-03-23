@@ -7,7 +7,7 @@ const { token, clientID, guildID } = require("./credentials/discordTestingBotCre
 // const YoutubeApi = require('youtube-api');
 // const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
 
-const test456 = require('./commands/botMenu/checkForLiveStreams.js');
+const checkForLiveStreams = require('./commands/botMenu/checkForLiveStreams.js');
 
 const fs = require('fs');
 const readline = require('readline');
@@ -278,7 +278,7 @@ function startLiveCheck()
   {  
     for (let cnt = 0; cnt < streamers.length; cnt++)
     {
-      await test456.Run(streamers[cnt], currentGuild, announceChannel, liveMemory[cnt]).then(() =>
+      await checkForLiveStreams.Run(streamers[cnt], currentGuild, announceChannel, liveMemory[cnt]).then(() =>
       {
         liveMemory[cnt] = liveStorage.liveStorage;
       });
