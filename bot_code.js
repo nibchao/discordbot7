@@ -53,7 +53,7 @@ client.once("ready", () =>
 
     currentGuild = client.guilds.cache.get(guildID);
     announceChannel = currentGuild.channels.cache.find(channel => channel.name === 'announce');
-    roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
+    roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
 
     client.user.setPresence
     ({
@@ -69,6 +69,8 @@ client.once("ready", () =>
     // console.log(`=== ${streamerUsername} is ` + '\x1b[32m%s\x1b[0m', 'online\x1b[0m' + '! ===');
     //console.log(`${streamerList} was created in bot_code.js directory.\n`);
     //console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'creating\x1b[0m' + ` empty ${streamerList} file.\n`);
+    //console.log('\x1b[36m%s\x1b[0m', 'I am cyan' + ' \x1b[35mtest\x1b[0m', 'I am test')
+    //console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' creating empty ' + `${streamerList}` + 'file.\n');
 
     if (fs.existsSync(`./${streamerList}`))
     {
@@ -76,7 +78,7 @@ client.once("ready", () =>
     }
     else
     {
-      console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ` in bot_code.js directory, creating empty ${streamerList} file.\n`);
+      console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' creating empty ' + `${streamerList}` + 'file.\n');
       fs.writeFile(`${streamerList}`, '', function(err)
       {
         if (err) throw err;
@@ -111,6 +113,18 @@ client.once("ready", () =>
       console.log(`No ${streamerList} roles were missing.`);
     }
     console.log();
+
+    let counter = 0;
+    roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+      \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+      \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+      \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+      \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+      \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+      \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+      sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
+      sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
+      sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });
 
     // get ID of that message to use for messageReactionAdd/Remove
     // i'm not sure how to do this, but i wanted to first filter messages in #role by message content then getting the message id from these filtered messages to use
@@ -386,29 +400,37 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
     let mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
     let memberUsername = mem.displayName;
-    let roleToAdd = '';
     let reactionEmojiName = reaction.emoji.name;
+    let counter = 0;
     switch (reactionEmojiName) // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     {
       case "1⃣": // if '1' reaction
-        roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[0]} ${notificationRoleSuffix}`);
+        counter += 0;
         break;
       case "2⃣": // if '2' reaction
-        roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[1]} ${notificationRoleSuffix}`);
+        counter += 1;
         break;
       case "3⃣": // if '3' reaction
-        roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[2]} ${notificationRoleSuffix}`);
+        counter += 2;
         break;
       case "4⃣": // if '4' reaction
-        roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[3]} ${notificationRoleSuffix}`);
+        counter += 3;
         break;
       case "5⃣": // if '5' reaction
-        roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[4]} ${notificationRoleSuffix}`);
+        counter += 4;
+        break;
+      case "6⃣":
+        counter += 5;
+        break;
+      case "7⃣":
+        counter += 6;
         break;
       default:
         console.log(`${memberUsername} tried to add a role, but a role was missing for the emoji reaction(s).`);
         return;
     }
+    let roleToAdd = '';
+    roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[counter]} ${notificationRoleSuffix}`);
     let roleName = '';
     roleName = roleToAdd.name;
     console.log(`${memberUsername} added "${roleName}" role.`);
@@ -440,29 +462,37 @@ client.on('messageReactionRemove', async (reaction, user) =>
 
     let mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
     let memberUsername = mem.displayName;
-    let roleToRemove = '';
     let reactionEmojiName = reaction.emoji.name;
+    let counter = 0;
     switch (reactionEmojiName) // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     {
       case "1⃣": // if '1' reaction
-        roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[0]} ${notificationRoleSuffix}`);
+        counter += 0;
         break;
       case "2⃣": // if '2' reaction
-        roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[1]} ${notificationRoleSuffix}`);
+        counter += 1;
         break;
       case "3⃣": // if '3' reaction
-        roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[2]} ${notificationRoleSuffix}`);
+        counter += 2;
         break;
       case "4⃣": // if '4' reaction
-        roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[3]} ${notificationRoleSuffix}`);
+        counter += 3;
         break;
       case "5⃣": // if '5' reaction
-        roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[4]} ${notificationRoleSuffix}`);
+        counter += 4;
+        break;
+      case "6⃣":
+        counter += 5;
+        break;
+      case "7⃣":
+        counter += 6;
         break;
       default:
         console.log(`${memberUsername} tried to remove a role, but a role was missing for the emoji reaction(s).`);
         return;
     }
+    let roleToRemove = '';
+    roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[counter]} ${notificationRoleSuffix}`);
     let roleName = '';
     roleName = roleToRemove.name;
     console.log(`${memberUsername} removed "${roleName}" role.`);
