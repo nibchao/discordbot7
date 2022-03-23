@@ -65,12 +65,7 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
-    //console.log(`@@@ ${streamerUsername} has gone ` + '\x1b[35m%s\x1b[0m', 'offline\x1b[0m' + '. @@@');
-    // console.log(`=== ${streamerUsername} is ` + '\x1b[32m%s\x1b[0m', 'online\x1b[0m' + '! ===');
-    //console.log(`${streamerList} was created in bot_code.js directory.\n`);
-    //console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'creating\x1b[0m' + ` empty ${streamerList} file.\n`);
-    //console.log('\x1b[36m%s\x1b[0m', 'I am cyan' + ' \x1b[35mtest\x1b[0m', 'I am test')
-    //console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' creating empty ' + `${streamerList}` + 'file.\n');
+    
 
     if (fs.existsSync(`./${streamerList}`))
     {
@@ -78,11 +73,11 @@ client.once("ready", () =>
     }
     else
     {
-      console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' creating empty ' + `${streamerList}` + 'file.\n');
+      console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32mcreating\x1b[0m' + ` empty ${streamerList} file.\n`);
       fs.writeFile(`${streamerList}`, '', function(err)
       {
         if (err) throw err;
-        console.log(`${streamerList} was created in bot_code.js directory.\n`);
+        console.log(`${streamerList} was ` + '\x1b[32m%s\x1b[0m', 'created\x1b[0m' + ' in bot_code.js directory.\n');
       });
     }
 
@@ -95,7 +90,7 @@ client.once("ready", () =>
         roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
         if (roleCheck === undefined)
         {
-          console.log(`${streamers[cnt]} ${notificationRoleSuffix} was missing, creating a Discord role for ${streamers[cnt]}.`);
+          console.log(`${streamers[cnt]} ${notificationRoleSuffix} was ` + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ', ' + '\x1b[32mcreating\x1b[0m' + ` a Discord role for ${streamers[cnt]}.`);
           currentGuild.roles.create({
             name: `${streamers[cnt]} ${notificationRoleSuffix}`,
             //color: 'BLUE',
@@ -110,21 +105,21 @@ client.once("ready", () =>
 
     if (roleCheckCount == streamers.length)
     {
-      console.log(`No ${streamerList} roles were missing.`);
+      console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.');
     }
     console.log();
 
-    let counter = 0;
+    /*let counter = 0;
     roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-      \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-      \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-      \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-      \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-      \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-      \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
-      sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-      sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
-      sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });
+    \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+    \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+    \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+    \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+    \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+    \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+    sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
+    sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
+    sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
     // get ID of that message to use for messageReactionAdd/Remove
     // i'm not sure how to do this, but i wanted to first filter messages in #role by message content then getting the message id from these filtered messages to use
@@ -141,13 +136,17 @@ client.once("ready", () =>
       // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205 
       // https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json
       // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣ - up to 20 reactions on a message
-      /*roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[0]} ${notificationRoleSuffix} 
-      \n 2⃣ ${streamersNoMarkDown[1]} ${notificationRoleSuffix} 
-      \n 3⃣ ${streamersNoMarkDown[2]} ${notificationRoleSuffix} 
-      \n 4⃣ ${streamersNoMarkDown[3]} ${notificationRoleSuffix}
-      \n 5⃣ ${streamersNoMarkDown[4]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+      /*let counter = 0;
+      roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+      \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+      \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+      \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+      \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+      \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+      \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
       sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-      sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
+      sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
+      sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });*/
     }
 
     //startBot();
