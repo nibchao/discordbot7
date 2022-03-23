@@ -30,7 +30,7 @@ module.exports.printMenu = function printMenu()
 
 module.exports.printStreamers = function printStreamers()
 {
-  const streamerListContents = fs.readFileSync('./streamerList.txt', {encoding:'utf8'});
+  let streamerListContents = fs.readFileSync('./streamerList.txt', {encoding:'utf8'});
   console.log(streamerListContents + '\n');
 }
 
@@ -59,7 +59,7 @@ module.exports.getStreamerUsername = function getStreamerUsername()
 // could add checks for invalid input like illegal characters/non-existent streamers
 module.exports.addStreamer = function addStreamer(streamerUsername)
 {
-  const test = fs.readFileSync('./streamerList.txt', 'utf8');
+  let test = fs.readFileSync('./streamerList.txt', 'utf8');
   if (test.includes(`${streamerUsername}`))
   {
     console.log(`${streamerUsername} is already in streamerList.txt`);
@@ -74,9 +74,9 @@ module.exports.addStreamer = function addStreamer(streamerUsername)
 // https://stackoverflow.com/q/14177087, https://stackoverflow.com/q/67512837, https://stackoverflow.com/a/50828436
 module.exports.removeStreamer = function removeStreamer(streamerUsername)
 {
-  const test = fs.readFileSync('./streamerList.txt', 'utf8');
-  const x = new RegExp(`\\b${streamerUsername}\\b`, 'gi');
-  const y = test.replace(x, '');
+  let test = fs.readFileSync('./streamerList.txt', 'utf8');
+  let x = new RegExp(`\\b${streamerUsername}\\b`, 'gi');
+  let y = test.replace(x, '');
   fs.writeFile('./streamerList.txt', y, 'utf8', function (error)
   {
     if (error)
@@ -92,8 +92,8 @@ module.exports.removeStreamer = function removeStreamer(streamerUsername)
 
 function removeBlankLines()
 {
-  const test = fs.readFileSync('./streamerList.txt', 'utf8');
-  const result = test.replace(/\n{1,}/g, '\n');
+  let test = fs.readFileSync('./streamerList.txt', 'utf8');
+  let result = test.replace(/\n{1,}/g, '\n');
   fs.writeFile('./streamerList.txt', result, 'utf8', function (error)
   {
     if (error)

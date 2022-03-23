@@ -7,18 +7,20 @@ const { token, clientID, guildID } = require("./credentials/discordTestingBotCre
 // const YoutubeApi = require('youtube-api');
 // const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
 
-var test456 = require('./commands/botMenu/checkForLiveStreams.js');
+const test456 = require('./commands/botMenu/checkForLiveStreams.js');
 
 const fs = require('fs');
 const readline = require('readline');
 
-var menuCommands = require('./commands/botMenu/menuFunctions.js');
+const menuCommands = require('./commands/botMenu/menuFunctions.js');
 const { resolve } = require("path"); // somehow related to botmenu stuff?
 const { memoryUsage } = require("process"); // somehow related to botmenu stuff?
 
 const commandPrefix = '!';
 const notificationRoleSuffix = 'role';
 const streamerList = 'streamerList.txt';
+
+const liveStorage = require('./commands/botMenu/checkForLiveStreams.js');
 
 const client = new Client
 ({intents: 
@@ -43,7 +45,7 @@ const client = new Client
 //   redirect_url: youtubeCredentials.redirect_uris
 // });
 
-var currentGuild, announceChannel, roleMessageID, roleChannel;
+let currentGuild = '', announceChannel = '', roleMessageID = '', roleChannel = '';
 client.once("ready", () =>
 {
     console.log(`Connected as ${client.user.tag}`);
@@ -63,11 +65,30 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
+    //console.log(`@@@ ${streamerUsername} has gone ` + '\x1b[35m%s\x1b[0m', 'offline\x1b[0m' + '. @@@');
+    // console.log(`=== ${streamerUsername} is ` + '\x1b[32m%s\x1b[0m', 'online\x1b[0m' + '! ===');
+    //console.log(`${streamerList} was created in bot_code.js directory.\n`);
+    //console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32m%s\x1b[0m', 'creating\x1b[0m' + ` empty ${streamerList} file.\n`);
+
+    if (fs.existsSync(`./${streamerList}`))
+    {
+      console.log(`\n${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.\n');
+    }
+    else
+    {
+      console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ` in bot_code.js directory, creating empty ${streamerList} file.\n`);
+      fs.writeFile(`${streamerList}`, '', function(err)
+      {
+        if (err) throw err;
+        console.log(`${streamerList} was created in bot_code.js directory.\n`);
+      });
+    }
+
     console.log(`Checking ${streamerList} for any missing roles.`);
     // checks if all roles in streamerList.txt exist, if not then creates
     // https://discord.js.org/#/docs/discord.js/stable/class/RoleManager?scrollTo=create
-    var roleCheck, roleCheckCount = 0;
-    for (var cnt = 0; cnt < streamers.length; cnt++)
+    let roleCheck = '', roleCheckCount = 0;
+    for (let cnt = 0; cnt < streamers.length; cnt++)
     {
         roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
         if (roleCheck === undefined)
@@ -89,6 +110,7 @@ client.once("ready", () =>
     {
       console.log(`No ${streamerList} roles were missing.`);
     }
+    console.log();
 
     // get ID of that message to use for messageReactionAdd/Remove
     // i'm not sure how to do this, but i wanted to first filter messages in #role by message content then getting the message id from these filtered messages to use
@@ -114,20 +136,6 @@ client.once("ready", () =>
       sent.react("4⃣")).then(() => sent.react("5⃣")).catch(() => console.error('emoji failed to react.')); });*/
     }
 
-    if (fs.existsSync(`./${streamerList}`))
-    {
-      console.log(`\n${streamerList} exists in bot_code.js directory, skipped creating file.\n`);
-    }
-    else
-    {
-      console.log(`${streamerList} was not found in bot_code.js directory, creating empty ${streamerList} file.`);
-      fs.writeFile(`${streamerList}`, '', function(err)
-      {
-        if (err) throw err;
-        console.log(`${streamerList} was created in bot_code.js directory.\n`);
-      });
-    }
-
     //startBot();
     //botMenu();
 
@@ -139,6 +147,7 @@ client.once("ready", () =>
 // check for if streamerList.txt file exists; if not, say that streamerList.txt must be created in same directory; maybe edit menu to display twitch notification option only if streamerList.txt exists
 async function botMenu()
 {
+  let menuChoice = '';
   do
   {
     menuChoice = await menuCommands.printMenu();
@@ -150,12 +159,12 @@ async function botMenu()
         break;
       case '1':
         console.log(`Adding streamer to ${streamerList}: \n`);
-        const addStreamerUsername = await menuCommands.getStreamerUsername();
+        let addStreamerUsername = await menuCommands.getStreamerUsername();
         menuCommands.addStreamer(addStreamerUsername);
         break;
       case '2': // if there are two duplicate usernames that were manually added to streamerList.txt, there will be an issue with 1 empty line left in the list
         console.log(`Removing streamer from ${streamerList}: \n`);
-        const removeStreamerUsername = await menuCommands.getStreamerUsername();
+        let removeStreamerUsername = await menuCommands.getStreamerUsername();
         menuCommands.removeStreamer(removeStreamerUsername);
         break;
       case '3': // enables bot functions - probably add setInterval loops in all bot functions (so far just live announcement) to check if start === 1 or something
@@ -210,9 +219,9 @@ function startBot()
   })
 }
 
-const liveMemory = [];
-const streamers = [];
-const streamersNoMarkDown = [];
+let liveMemory = [];
+let streamers = [];
+let streamersNoMarkDown = [];
 readline.createInterface // https://stackoverflow.com/a/12299566 / https://stackoverflow.com/a/41407246 for text color reference
 (
   {
@@ -221,24 +230,25 @@ readline.createInterface // https://stackoverflow.com/a/12299566 / https://stack
   }
 ).on('line', function(line)
 {
-  // const noDiscordMarkdownUsername = displayName.replaceAll('_', '*_*');
-  var x = line.replaceAll('_',  '*_*');
-  streamersNoMarkDown.push(x);
+  let lineNoMarkDown = '';
+  lineNoMarkDown = line.replaceAll('_',  '*_*');
+  streamersNoMarkDown.push(lineNoMarkDown);
   streamers.push(line); // this pushes the streamer usernames from the .txt into streamers array
 });
 
-for (var cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemory variable for each streamer
+for (let cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemory variable for each streamer
 {
   liveMemory[cnt] = false;
 }
 
-const roleMissing = [];
-const roleFound = ['ekun7']; // hardcoded to include my username by default
+let roleMissing = [];
+let roleFound = ['ekun7']; // hardcoded to include my username by default
 function checkStreamerNotificationRoles()
 {
-  for (var cnt = 0; cnt < streamers.length; cnt++)
+  for (let cnt = 0; cnt < streamers.length; cnt++)
   {
-    const roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
+    let roleID = '';
+    roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
     if (roleID === undefined)
     {
       roleMissing.push(streamers[cnt]);
@@ -266,9 +276,7 @@ function startLiveCheck()
 {
   setInterval(async() =>
   {  
-    var liveStorage = require('./commands/botMenu/checkForLiveStreams.js');
-
-    for (var cnt = 0; cnt < streamers.length; cnt++)
+    for (let cnt = 0; cnt < streamers.length; cnt++)
     {
       await test456.Run(streamers[cnt], currentGuild, announceChannel, liveMemory[cnt]).then(() =>
       {
@@ -280,16 +288,16 @@ function startLiveCheck()
 
 client.on('messageCreate', async(message) => 
 {
-  const args = message.content.slice(commandPrefix.length).trim().split(/ +/g);
-  const command = args.shift().toLowerCase(); 
+  let args = message.content.slice(commandPrefix.length).trim().split(/ +/g);
+  let command = args.shift().toLowerCase(); 
 
   if (message.author.bot) 
   {
     return;
   }
 
-  const target = message.mentions.users.first();
-  const reason = message.content.slice(command.length + 1).trim().split(/ +/g);
+  let target = message.mentions.users.first();
+  let reason = message.content.slice(command.length + 1).trim().split(/ +/g);
   // make kick/ban use discord's built in kick()/ban() functions
   if (command === 'kick')
   {
@@ -300,7 +308,7 @@ client.on('messageCreate', async(message) =>
         message.channel.send('Error: User not found or target was missing. Command format is !kick @<user> [optional reason].');
         return;
       }
-      const memberID = message.guild.members.cache.get(target.id); 
+      let memberID = message.guild.members.cache.get(target.id); 
       // Negative number if this role's position is lower (other role's is higher), positive number if this one is higher (other's is lower), 0 if equal
       if (message.member.roles.highest.comparePositionTo(message.mentions.members.first().roles.highest) <= 0)
       {
@@ -330,7 +338,7 @@ client.on('messageCreate', async(message) =>
         message.channel.send('Error: User not found or target was missing. Command format is !ban @<user> [optional reason].');
         return;
       }
-      const memberID = message.guild.members.cache.get(target.id); 
+      let memberID = message.guild.members.cache.get(target.id); 
       // Negative number if this role's position is lower (other role's is higher), positive number if this one is higher (other's is lower), 0 if equal
       if (message.member.roles.highest.comparePositionTo(message.mentions.members.first().roles.highest) <= 0)
       {
@@ -376,10 +384,10 @@ client.on('messageReactionAdd', async (reaction, user) =>
         return;
     }
 
-    const mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
-    const memberUsername = mem.displayName;
-    var roleToAdd;
-    var reactionEmojiName = reaction.emoji.name;
+    let mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
+    let memberUsername = mem.displayName;
+    let roleToAdd = '';
+    let reactionEmojiName = reaction.emoji.name;
     switch (reactionEmojiName) // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     {
       case "1⃣": // if '1' reaction
@@ -401,7 +409,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
         console.log(`${memberUsername} tried to add a role, but a role was missing for the emoji reaction(s).`);
         return;
     }
-    var roleName = roleToAdd.name;
+    let roleName = '';
+    roleName = roleToAdd.name;
     console.log(`${memberUsername} added "${roleName}" role.`);
     mem.roles.add(roleToAdd);
   }
@@ -429,10 +438,10 @@ client.on('messageReactionRemove', async (reaction, user) =>
       return;
     }
 
-    const mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
-    const memberUsername = mem.displayName;
-    var roleToRemove;
-    var reactionEmojiName = reaction.emoji.name;
+    let mem = reaction.message.guild.members.cache.find(mem => mem.id === user.id);
+    let memberUsername = mem.displayName;
+    let roleToRemove = '';
+    let reactionEmojiName = reaction.emoji.name;
     switch (reactionEmojiName) // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣
     {
       case "1⃣": // if '1' reaction
@@ -454,7 +463,8 @@ client.on('messageReactionRemove', async (reaction, user) =>
         console.log(`${memberUsername} tried to remove a role, but a role was missing for the emoji reaction(s).`);
         return;
     }
-    var roleName = roleToRemove.name;
+    let roleName = '';
+    roleName = roleToRemove.name;
     console.log(`${memberUsername} removed "${roleName}" role.`);
     mem.roles.remove(roleToRemove);
   }

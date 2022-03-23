@@ -12,9 +12,9 @@ const twitch = new TwitchApi
 // 3 edge cases: streamer with no stream info (1), streamer with only title info (2), streamer with only game info (3) 
 module.exports = async function streamLiveNotificationAnnounce(streamerUsername, currentGuild, announceChannel, liveMemory)
 {
-    const stream = await twitch.getStreams({user_login: streamerUsername});
+    let stream = await twitch.getStreams({user_login: streamerUsername});
 
-    const streamData = stream.data[0];
+    let streamData = stream.data[0];
 
     if (liveMemory === true)
     {
@@ -39,21 +39,21 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
     { 
         streamTitle = streamData.title 
     }
-    const userName = streamData.user_name;
+    let userName = streamData.user_name;
 
-    const streamThumbnail = streamData.thumbnail_url;
-    const widthReplace = streamThumbnail.replace(/{width}/i, '1920');
-    const heightReplace = widthReplace.replace(/{height}/i, '1080');
+    let streamThumbnail = streamData.thumbnail_url;
+    let widthReplace = streamThumbnail.replace(/{width}/i, '1920');
+    let heightReplace = widthReplace.replace(/{height}/i, '1080');
 
-    const currentUnixTime = Date.now();
-    const uniqueThumbnail = heightReplace + `?time=${currentUnixTime}`; 
+    let currentUnixTime = Date.now();
+    let uniqueThumbnail = heightReplace + `?time=${currentUnixTime}`; 
     // since discord was caching the same thumbnail image after obtaining the stream thumbnail once, the same image was used for any live announcements 
     // appending unix time at the end will force discord to cache a new thumbnail image for stream thumbnails
 
-    const gameID = streamData.game_id; 
+    let gameID = streamData.game_id; 
 
-    const game = await twitch.getGames(gameID);
-    const gameData = game.data[0];
+    let game = await twitch.getGames(gameID);
+    let gameData = game.data[0];
 
     // (3) Edge Case
     if (gameData === undefined)
@@ -65,14 +65,14 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
         gameName = gameData.name;
     }
 
-    const viewerCount = streamData.viewer_count;
+    let viewerCount = streamData.viewer_count;
 
-    const user = await twitch.getUsers(streamerUsername);
-    const userData = user.data[0];
-    const profilePicture = userData.profile_image_url;
-    const displayName = userData.display_name;
+    let user = await twitch.getUsers(streamerUsername);
+    let userData = user.data[0];
+    let profilePicture = userData.profile_image_url;
+    let displayName = userData.display_name;
 
-    const liveNotificationEmbed = 
+    let liveNotificationEmbed = 
     {
         color: 0x6441A4, // sets embed sidebar color 
         title: streamTitle,
@@ -105,14 +105,16 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
             url: uniqueThumbnail, // get stream thumbnail
         }
     };
-    const noDiscordMarkdownUsername = displayName.replaceAll('_', '*_*');
+    let noDiscordMarkdownUsername = '';
+    noDiscordMarkdownUsername = displayName.replaceAll('_', '*_*');
     if (streamerUsername === 'ekun7')
     {
         announceChannel.send({content:`Hey @everyone ${noDiscordMarkdownUsername} is now live! https://www.twitch.tv/${streamerUsername}/`, embeds: [liveNotificationEmbed]}); 
     }
     else
     {
-        const roleID = currentGuild.roles.cache.find(role => role.name === `${streamerUsername} role`);
+        let roleID = '';
+        roleID = currentGuild.roles.cache.find(role => role.name === `${streamerUsername} role`);
         if (roleID === undefined)
         {
             return;

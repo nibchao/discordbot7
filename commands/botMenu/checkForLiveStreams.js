@@ -15,7 +15,7 @@ async function Run(streamerUsername, currentGuild, announceChannel, liveMemory)
 {
   await twitch.getStreams({user_login: streamerUsername}).then(async data => 
     {
-      const r = data.data[0];
+      let r = data.data[0];
 
       if (r !== undefined)
       {
