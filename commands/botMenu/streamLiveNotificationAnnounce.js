@@ -46,9 +46,7 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
     let heightReplace = widthReplace.replace(/{height}/i, '1080');
 
     let currentUnixTime = Date.now();
-    let uniqueThumbnail = heightReplace + `?time=${currentUnixTime}`; 
-    // since discord was caching the same thumbnail image after obtaining the stream thumbnail once, the same image was used for any live announcements 
-    // appending unix time at the end will force discord to cache a new thumbnail image for stream thumbnails
+    let uniqueThumbnail = heightReplace + `?time=${currentUnixTime}`; // appending unix time forces Discord to post a new thumbnail instead of using previously cached one
 
     let gameID = streamData.game_id; 
 
@@ -102,7 +100,7 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
         ],
         image: 
         {
-            url: uniqueThumbnail, // get stream thumbnail
+            url: uniqueThumbnail,
         }
     };
     let noDiscordMarkdownUsername = '';

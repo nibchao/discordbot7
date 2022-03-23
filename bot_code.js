@@ -7,20 +7,24 @@ const { token, clientID, guildID } = require("./credentials/discordTestingBotCre
 // const YoutubeApi = require('youtube-api');
 // const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
 
+// Check for live streams
 const checkForLiveStreams = require('./commands/botMenu/checkForLiveStreams.js');
+//
 
+// For File I/O
 const fs = require('fs');
 const readline = require('readline');
+//
 
+// botMenu
 const menuCommands = require('./commands/botMenu/menuFunctions.js');
-const { resolve } = require("path"); // somehow related to botmenu stuff?
-const { memoryUsage } = require("process"); // somehow related to botmenu stuff?
+const { resolve } = require("path");
+const { memoryUsage } = require("process");
+//
 
 const commandPrefix = '!';
 const notificationRoleSuffix = 'role';
 const streamerList = 'streamerList.txt';
-
-const liveStorage = require('./commands/botMenu/checkForLiveStreams.js');
 
 const client = new Client
 ({intents: 
@@ -65,8 +69,6 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
-    
-
     if (fs.existsSync(`./${streamerList}`))
     {
       console.log(`\n${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.\n');
@@ -81,9 +83,8 @@ client.once("ready", () =>
       });
     }
 
-    console.log(`Checking ${streamerList} for any missing roles.`);
-    // checks if all roles in streamerList.txt exist, if not then creates
     // https://discord.js.org/#/docs/discord.js/stable/class/RoleManager?scrollTo=create
+    console.log(`Checking ${streamerList} for any missing roles.`);
     let roleCheck = '', roleCheckCount = 0;
     for (let cnt = 0; cnt < streamers.length; cnt++)
     {
@@ -103,12 +104,14 @@ client.once("ready", () =>
         }
     }
 
+    // if number of checked roles equals number of streamerList.txt roles, then all roles exist
     if (roleCheckCount == streamers.length)
     {
       console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.');
     }
     console.log();
 
+    // temporary here for testing role message + reaction add/remove
     /*let counter = 0;
     roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
     \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
@@ -121,15 +124,14 @@ client.once("ready", () =>
     sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
     sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });*/
 
-    // get ID of that message to use for messageReactionAdd/Remove
-    // i'm not sure how to do this, but i wanted to first filter messages in #role by message content then getting the message id from these filtered messages to use
-    // for message reaction add/remove instead of hardcoding the role assign message ID manually
-    /*var x;
+    // i'm not sure how to do this, but i wanted to do the following: filter messages in #role by message content (works), get message ids of filtered messages for messageReactionAdd/Remove to check (can't figure out)
+    // another way could be to read in a .txt file for message ID; first create role message, store the roleMessageID in the .txt file, read in this file for the ID any time after the bot is restarted 
+    /*let filteredMessage = '';
     roleChannel.messages.fetch().then(messages => 
     {
-      x = (messages.filter(m => m.content.includes('Twitch Notification Roles')));
-      console.log(x);
-    }).catch(console.error).then(() => console.log(''));*/
+      filteredMessage = (messages.filter(m => m.content.includes('Twitch Notification Roles')));
+      console.log(filteredMessage);
+    }).catch(console.error);*/
 
     if (roleMessageID === undefined)
     {
@@ -156,8 +158,6 @@ client.once("ready", () =>
     //startLiveCheck();
 });
 
-// add option to: add youtube channels for notifications, view emote requests written to a file/channel, create twitch notification roles
-// check for if streamerList.txt file exists; if not, say that streamerList.txt must be created in same directory; maybe edit menu to display twitch notification option only if streamerList.txt exists
 async function botMenu()
 {
   let menuChoice = '';
@@ -166,11 +166,11 @@ async function botMenu()
     menuChoice = await menuCommands.printMenu();
     switch(menuChoice)
     {
-      case '0':
+      case '0': // prints usernames in streamerList.txt
         console.log(`Printing contents of ${streamerList}: \n`);
         menuCommands.printStreamers();
         break;
-      case '1':
+      case '1': // adds username to streamerList.txt
         console.log(`Adding streamer to ${streamerList}: \n`);
         let addStreamerUsername = await menuCommands.getStreamerUsername();
         menuCommands.addStreamer(addStreamerUsername);
@@ -190,9 +190,18 @@ async function botMenu()
       case '5':
         console.log('Ended the program.');
         process.exit(0);
-      case '6':
+      case '6': // make bot post role message in #role channel
         console.log('Post roles in #role channel. \n');
         // make command for posting roles
+        break;
+      case '7': // adds username to youtubeList.txt
+        console.log('Add YouTube channel for notifications')
+        break;
+      case '8': // prints contents of emoteRequests.txt
+        console.log('Print all existing emote requests');
+        break;
+      case '9': // remove username from youtubeList.txt
+        console.log('Remove youtuber from youtubeList.txt');
         break;
       default:
         console.log('Error: Invalid input. Enter a value from 0-5.\n');
@@ -232,10 +241,11 @@ function startBot()
   })
 }
 
+// https://stackoverflow.com/a/12299566
 let liveMemory = [];
 let streamers = [];
 let streamersNoMarkDown = [];
-readline.createInterface // https://stackoverflow.com/a/12299566 / https://stackoverflow.com/a/41407246 for text color reference
+readline.createInterface
 (
   {
     input: fs.createReadStream(`./${streamerList}`),
@@ -246,7 +256,7 @@ readline.createInterface // https://stackoverflow.com/a/12299566 / https://stack
   let lineNoMarkDown = '';
   lineNoMarkDown = line.replaceAll('_',  '*_*');
   streamersNoMarkDown.push(lineNoMarkDown);
-  streamers.push(line); // this pushes the streamer usernames from the .txt into streamers array
+  streamers.push(line);
 });
 
 for (let cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemory variable for each streamer
@@ -293,10 +303,10 @@ function startLiveCheck()
     {
       await checkForLiveStreams.Run(streamers[cnt], currentGuild, announceChannel, liveMemory[cnt]).then(() =>
       {
-        liveMemory[cnt] = liveStorage.liveStorage;
+        liveMemory[cnt] = checkForLiveStreams.liveStorage;
       });
     }
-  }, 30000); // increase this delay when everything works because if bitrate drops a lot for long enough, stream will "go offline" when it's not; maybe set to default hangtime duration for twitch disconnect protection
+  }, 30000);
 }
 
 client.on('messageCreate', async(message) => 
@@ -311,7 +321,7 @@ client.on('messageCreate', async(message) =>
 
   let target = message.mentions.users.first();
   let reason = message.content.slice(command.length + 1).trim().split(/ +/g);
-  // make kick/ban use discord's built in kick()/ban() functions
+  
   if (command === 'kick')
   {
     if (message.member.permissions.has([Permissions.FLAGS.KICK_MEMBERS]))
@@ -322,7 +332,6 @@ client.on('messageCreate', async(message) =>
         return;
       }
       let memberID = message.guild.members.cache.get(target.id); 
-      // Negative number if this role's position is lower (other role's is higher), positive number if this one is higher (other's is lower), 0 if equal
       if (message.member.roles.highest.comparePositionTo(message.mentions.members.first().roles.highest) <= 0)
       {
         message.channel.send(`${memberID} has a higher role and could not be kicked.`);
@@ -352,7 +361,6 @@ client.on('messageCreate', async(message) =>
         return;
       }
       let memberID = message.guild.members.cache.get(target.id); 
-      // Negative number if this role's position is lower (other role's is higher), positive number if this one is higher (other's is lower), 0 if equal
       if (message.member.roles.highest.comparePositionTo(message.mentions.members.first().roles.highest) <= 0)
       {
         message.channel.send(`${memberID} has a higher role and could not be banned.`);
@@ -418,10 +426,10 @@ client.on('messageReactionAdd', async (reaction, user) =>
       case "5⃣": // if '5' reaction
         counter += 4;
         break;
-      case "6⃣":
+      case "6⃣": // if '6' reaction
         counter += 5;
         break;
-      case "7⃣":
+      case "7⃣": // if '7' reaction
         counter += 6;
         break;
       default:
@@ -480,10 +488,10 @@ client.on('messageReactionRemove', async (reaction, user) =>
       case "5⃣": // if '5' reaction
         counter += 4;
         break;
-      case "6⃣":
+      case "6⃣": // if '6' reaction
         counter += 5;
         break;
-      case "7⃣":
+      case "7⃣": // if '7' reaction
         counter += 6;
         break;
       default:
