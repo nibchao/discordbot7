@@ -161,8 +161,8 @@ client.once("ready", () =>
     //startBot();
     //botMenu();
 
-    //checkStreamerNotificationRoles();
-    //startLiveCheck();
+    checkStreamerNotificationRoles(); // this may not be necessary anymore since missing roles are checked above
+    startLiveCheck();
 });
 
 async function botMenu()
