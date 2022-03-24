@@ -112,7 +112,7 @@ client.once("ready", () =>
     console.log();
 
     // temporary here for testing role message + reaction add/remove
-    /*let counter = 0;
+    let counter = 0;
     roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
     \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
     \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
@@ -122,7 +122,7 @@ client.once("ready", () =>
     \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
     sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
     sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
-    sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });*/
+    sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });
 
     // i'm not sure how to do this, but i wanted to do the following: filter messages in #role by message content (works), get message ids of filtered messages for messageReactionAdd/Remove to check (can't figure out)
     // another way could be to read in a .txt file for message ID; first create role message, store the roleMessageID in the .txt file, read in this file for the ID any time after the bot is restarted 
@@ -241,11 +241,10 @@ function startBot()
   })
 }
 
-// https://stackoverflow.com/a/12299566
 let liveMemory = [];
 let streamers = [];
 let streamersNoMarkDown = [];
-readline.createInterface
+readline.createInterface // https://stackoverflow.com/a/12299566
 (
   {
     input: fs.createReadStream(`./${streamerList}`),
@@ -440,7 +439,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
     roleToAdd = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[counter]} ${notificationRoleSuffix}`);
     let roleName = '';
     roleName = roleToAdd.name;
-    console.log(`${memberUsername} added "${roleName}" role.`);
+    console.log('\x1b[4m%s\x1b[0m', `${memberUsername}\x1b[0m` + '\x1b[36m added \x1b[0m' + `"${roleName}" role.`);
     mem.roles.add(roleToAdd);
   }
 })
@@ -502,7 +501,7 @@ client.on('messageReactionRemove', async (reaction, user) =>
     roleToRemove = reaction.message.guild.roles.cache.find(role => role.name === `${streamers[counter]} ${notificationRoleSuffix}`);
     let roleName = '';
     roleName = roleToRemove.name;
-    console.log(`${memberUsername} removed "${roleName}" role.`);
+    console.log('\x1b[4m%s\x1b[0m', `${memberUsername}\x1b[0m` + '\x1b[36m removed \x1b[0m' + `"${roleName}" role.`);
     mem.roles.remove(roleToRemove);
   }
 })
