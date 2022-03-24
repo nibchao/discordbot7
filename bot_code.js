@@ -42,6 +42,12 @@ const client = new Client
   ]
 });
 
+// https://stackoverflow.com/a/18818533
+require('console-stamp')(console, { 
+  format: ':date(HH:MM:ss)' 
+} );
+//
+
 // const oauth = YoutubeApi.authenticate
 // ({
 //   type: "oauth", 
@@ -72,21 +78,13 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
-    var myDate = new Date()
-    var pstDate = myDate.toLocaleString("en-US", {
-      timeZone: "America/Los_Angeles"
-    })
-    console.log(pstDate)
-
-    console.log(`\n ${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' FILLER.js directory.');
-
     if (fs.existsSync(`./${streamerList}`))
     {
-      console.log(`\n ${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.');
+      console.log(`${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.');
     }
     else
     {
-      console.log(`\n${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32mcreating\x1b[0m' + ` empty ${streamerList} file.\n`);
+      console.log(`${streamerList}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32mcreating\x1b[0m' + ` empty ${streamerList} file.\n`);
       fs.writeFile(`${streamerList}`, '', function(err)
       {
         if (err) throw err;
@@ -132,9 +130,8 @@ client.once("ready", () =>
     // if number of checked roles equals number of streamerList.txt roles, then all roles exist
     if (roleCheckCount == streamers.length)
     {
-      console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.');
+      console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.\n');
     }
-    console.log();
 
     if (roleMessageIDArray[0] === undefined)
     {
@@ -170,7 +167,7 @@ client.once("ready", () =>
     //botMenu();
 
     //checkStreamerNotificationRoles(); // this may not be necessary anymore since missing roles are checked above
-    //startLiveCheck();
+    startLiveCheck();
 });
 
 async function botMenu()
