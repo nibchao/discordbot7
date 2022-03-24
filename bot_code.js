@@ -50,13 +50,15 @@ const client = new Client
 //   redirect_url: youtubeCredentials.redirect_uris
 // });
 
-let currentGuild = '', announceChannel = '', roleMessageID = '', roleChannel = '';
+let currentGuild = '', announceChannel = '', roleMessageID = '', roleChannel = '', connectedGuildName = '';
 client.once("ready", () =>
 {
     console.log(`Connected as ${client.user.tag}`);
+    currentGuild = client.guilds.cache.get(guildID);
+    connectedGuildName = currentGuild.name;
+    console.log(connectedGuildName);
     console.log('---------------------------');
 
-    currentGuild = client.guilds.cache.get(guildID);
     announceChannel = currentGuild.channels.cache.find(channel => channel.name === 'announce');
     roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
 
