@@ -72,9 +72,17 @@ client.once("ready", () =>
       status: 'online' // idle, offline, dnd
     });
 
+    var myDate = new Date()
+    var pstDate = myDate.toLocaleString("en-US", {
+      timeZone: "America/Los_Angeles"
+    })
+    console.log(pstDate)
+
+    console.log(`\n ${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' FILLER.js directory.');
+
     if (fs.existsSync(`./${streamerList}`))
     {
-      console.log(`\n${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.');
+      console.log(`\n ${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.');
     }
     else
     {
@@ -161,8 +169,8 @@ client.once("ready", () =>
     //startBot();
     //botMenu();
 
-    checkStreamerNotificationRoles(); // this may not be necessary anymore since missing roles are checked above
-    startLiveCheck();
+    //checkStreamerNotificationRoles(); // this may not be necessary anymore since missing roles are checked above
+    //startLiveCheck();
 });
 
 async function botMenu()
