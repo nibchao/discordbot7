@@ -25,6 +25,7 @@ const { memoryUsage } = require("process");
 const commandPrefix = '!';
 const notificationRoleSuffix = 'role';
 const streamerList = 'streamerList.txt';
+const roleMessageIDFile = 'roleMessageID.txt';
 
 const client = new Client
 ({intents: 
@@ -71,7 +72,7 @@ client.once("ready", () =>
 
     if (fs.existsSync(`./${streamerList}`))
     {
-      console.log(`\n${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.\n');
+      console.log(`\n${streamerList}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.');
     }
     else
     {
@@ -80,6 +81,20 @@ client.once("ready", () =>
       {
         if (err) throw err;
         console.log(`${streamerList} was ` + '\x1b[32m%s\x1b[0m', 'created\x1b[0m' + ' in bot_code.js directory.\n');
+      });
+    }
+
+    if (fs.existsSync(`./${roleMessageIDFile}`))
+    {
+      console.log(`${roleMessageIDFile}` + ' was ' + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + ' in bot_code.js directory.\n');
+    }
+    else
+    {
+      console.log(`${roleMessageIDFile}` + ' was ' + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ' in bot_code.js directory, ' + '\x1b[32mcreating\x1b[0m' + ` empty ${roleMessageIDFile} file.\n`);
+      fs.writeFile(`${roleMessageIDFile}`, '', function(err)
+      {
+        if (err) throw err;
+        console.log(`${roleMessageIDFile} was ` + '\x1b[32m%s\x1b[0m', 'created\x1b[0m' + ' in bot_code.js directory.\n');
       });
     }
 
@@ -111,21 +126,30 @@ client.once("ready", () =>
     }
     console.log();
 
-    // temporary here for testing role message + reaction add/remove
-    let counter = 0;
-    roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-    \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-    \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-    \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-    \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-    \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-    \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
-    sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-    sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
-    sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });
+    if (roleMessageIDArray[0] === undefined)
+    {
+        let counter = 0;
+        roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+        \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+        \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+        \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+        \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+        \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+        \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+        sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
+        sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
+        sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')).then(() =>
+        fs.appendFileSync(`./${roleMessageIDFile}`, `${roleMessageID}`, {encoding:'utf8'})); });
+    }
+    else
+    {
+      roleMessageID = roleMessageIDArray[0];
+    }
+
 
     // i'm not sure how to do this, but i wanted to do the following: filter messages in #role by message content (works), get message ids of filtered messages for messageReactionAdd/Remove to check (can't figure out)
     // another way could be to read in a .txt file for message ID; first create role message, store the roleMessageID in the .txt file, read in this file for the ID any time after the bot is restarted 
+    // this method would work if there were only 1 twitch notification role message though
     /*let filteredMessage = '';
     roleChannel.messages.fetch().then(messages => 
     {
@@ -256,6 +280,18 @@ readline.createInterface // https://stackoverflow.com/a/12299566
   lineNoMarkDown = line.replaceAll('_',  '*_*');
   streamersNoMarkDown.push(lineNoMarkDown);
   streamers.push(line);
+});
+
+let roleMessageIDArray = [];
+readline.createInterface
+(
+  {
+    input: fs.createReadStream(`./${roleMessageIDFile}`),
+    terminal: false
+  }
+).on('line', function(line)
+{
+  roleMessageIDArray.push(line);
 });
 
 for (let cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemory variable for each streamer
@@ -398,8 +434,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
   }
   if (user.bot === false)
   {
-    //if (reaction.message.id != roleMessageID)
-    if (reaction.message.id === '955244733419098112') // temporarily hardcoded role message ID
+    if (reaction.message.id != roleMessageID)
+    //if (reaction.message.id !== '955244733419098112') // temporarily hardcoded role message ID
     {
         return;
     }
@@ -460,8 +496,8 @@ client.on('messageReactionRemove', async (reaction, user) =>
   }
   if (user.bot === false)
   {
-    //if (reaction.message.id != roleMessageID)
-    if (reaction.message.id === '955244733419098112') // temporarily hardcoded role message ID
+    if (reaction.message.id != roleMessageID)
+    //if (reaction.message.id !== '955244733419098112') // temporarily hardcoded role message ID
     {
       return;
     }
