@@ -58,7 +58,7 @@ client.once("ready", () =>
 
     currentGuild = client.guilds.cache.get(guildID);
     announceChannel = currentGuild.channels.cache.find(channel => channel.name === 'announce');
-    roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'bot');
+    roleChannel = currentGuild.channels.cache.find(channel => channel.name === 'role');
 
     client.user.setPresence
     ({
@@ -146,7 +146,6 @@ client.once("ready", () =>
       roleMessageID = roleMessageIDArray[0];
     }
 
-
     // i'm not sure how to do this, but i wanted to do the following: filter messages in #role by message content (works), get message ids of filtered messages for messageReactionAdd/Remove to check (can't figure out)
     // another way could be to read in a .txt file for message ID; first create role message, store the roleMessageID in the .txt file, read in this file for the ID any time after the bot is restarted 
     // this method would work if there were only 1 twitch notification role message though
@@ -156,24 +155,6 @@ client.once("ready", () =>
       filteredMessage = (messages.filter(m => m.content.includes('Twitch Notification Roles')));
       console.log(filteredMessage);
     }).catch(console.error);*/
-
-    if (roleMessageID === undefined)
-    {
-      // https://github.com/discord/discord-api-docs/issues/2723#issuecomment-807022205 
-      // https://emzi0767.gl-pages.emzi0767.dev/discord-emoji/discordEmojiMap-canary.json
-      // 1⃣ 2⃣ 3⃣ 4⃣ 5⃣ 6⃣ 7⃣ 8⃣ 9⃣ - up to 20 reactions on a message
-      /*let counter = 0;
-      roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-      \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-      \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-      \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-      \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-      \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-      \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
-      sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-      sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
-      sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')); });*/
-    }
 
     //startBot();
     //botMenu();
