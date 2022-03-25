@@ -2,3 +2,5 @@ credentials/discordCredentials.json
 credentials/twitchCredentials.json
 credentials/youtubeCredentials.json
 credentials/
+client_secret.json
+quickstart.js
