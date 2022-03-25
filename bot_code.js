@@ -4,8 +4,8 @@ const { Client, Intents, Message, Permissions, GuildEmojiRoleManager, MessageEmb
 const { token, clientID, guildID } = require("./credentials/discordTestingBotCredentials.json"); // comment this when uploading to main bot
 
 // https://www.npmjs.com/package/youtube-api
-// const YoutubeApi = require('youtube-api');
-// const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
+ const YoutubeApi = require('youtube-api');
+ const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
 
 // Check for live streams
 const checkForLiveStreams = require('./commands/botMenu/checkForLiveStreams.js');
@@ -48,13 +48,17 @@ require('console-stamp')(console, {
 } );
 //
 
-// const oauth = YoutubeApi.authenticate
-// ({
-//   type: "oauth", 
-//   client_id: youtubeCredentials.client_id, 
-//   client_secret: youtubeCredentials.client_secret,
-//   redirect_url: youtubeCredentials.redirect_uris
-// });
+const oauth = YoutubeApi.authenticate
+({
+  type: "oauth", 
+  client_id: youtubeCredentials.client_id, 
+  client_secret: youtubeCredentials.client_secret,
+  redirect_url: youtubeCredentials.redirect_uri,
+  api_key: youtubeCredentials.api_key
+});
+
+// YOUTUBE NOTIFICATION IDEA
+// scan youtube channels for uploads, depending on their id they have different usernames, mention corresponding role + put link in notification message
 
 let currentGuild = '', announceChannel = '', roleMessageID = '', roleChannel = '', connectedGuildName = '';
 client.once("ready", () =>
@@ -153,21 +157,12 @@ client.once("ready", () =>
       roleMessageID = roleMessageIDArray[0];
     }
 
-    // i'm not sure how to do this, but i wanted to do the following: filter messages in #role by message content (works), get message ids of filtered messages for messageReactionAdd/Remove to check (can't figure out)
-    // another way could be to read in a .txt file for message ID; first create role message, store the roleMessageID in the .txt file, read in this file for the ID any time after the bot is restarted 
-    // this method would work if there were only 1 twitch notification role message though
-    /*let filteredMessage = '';
-    roleChannel.messages.fetch().then(messages => 
-    {
-      filteredMessage = (messages.filter(m => m.content.includes('Twitch Notification Roles')));
-      console.log(filteredMessage);
-    }).catch(console.error);*/
+
 
     //startBot();
     //botMenu();
 
-    //checkStreamerNotificationRoles(); // this may not be necessary anymore since missing roles are checked above
-    startLiveCheck();
+    //startLiveCheck();
 });
 
 async function botMenu()
@@ -285,37 +280,6 @@ readline.createInterface
 for (let cnt = 0; cnt < streamers.length; cnt++) // for loop creates a liveMemory variable for each streamer
 {
   liveMemory[cnt] = false;
-}
-
-let roleMissing = [];
-let roleFound = ['ekun7']; // hardcoded to include my username by default
-function checkStreamerNotificationRoles()
-{
-  for (let cnt = 0; cnt < streamers.length; cnt++)
-  {
-    let roleID = '';
-    roleID = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
-    if (roleID === undefined)
-    {
-      roleMissing.push(streamers[cnt]);
-    }
-    else
-    {
-      roleFound.push(streamers[cnt]);
-    }
-  }
- 
-  if (roleMissing.length == 0)
-  {
-    console.log('No roles were missing.');
-  }
-  else
-  {
-    console.log(`${roleMissing} roles were ` + '\x1b[35m%s\x1b[0m', 'not found\x1b[0m' + '. No live announcement for these streamers.');
-  }
-  console.log('----------');
-  console.log(`${roleFound} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '! Live announcements enabled for these streamers.');
-  console.log('---------------------------');
 }
 
 function startLiveCheck()
@@ -531,13 +495,6 @@ client.on('messageReactionRemove', async (reaction, user) =>
 })
 
 client.login(token);
-
-// YOUTUBE NOTIFICATION IDEA
-//
-// get channel name, get video title, set header title to 'youtube'; simple send message with @everyone
-// since discord auto embeds youtube links, maybe don't even need to do the fetching video info
-// and just fetch the latest video then post link with message in #youtube channel using auto embed
-
 
 // SLASH COMMANDS STUFF
 //
