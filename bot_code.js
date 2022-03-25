@@ -157,13 +157,27 @@ client.once("ready", () =>
       roleMessageID = roleMessageIDArray[0];
     }
 
+    // hardcoded youtube channel url at the moment; if it's possible, try to get youtube channel url by fetching via search parameters https://developers.google.com/youtube/v3/docs/search/list?apix=true
+    // https://stackoverflow.com/a/1431113
+    let ytChannelURL = 'UCSD0MKMFT0bZP4jj6c5ihMw'; // need to see what happens when user has custom channel URL
+    console.log(ytChannelURL);
+    let latestVideoURL = '';
+    latestVideoURL = ytChannelURL.replaceAt(1, 'U'); // replacing the C with a U makes the playlist request work for some reason
+    console.log(latestVideoURL);
 
+
+    console.log(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${latestVideoURL}&maxResults=1&key=${youtubeCredentials.api_key}`);
+    // then get videoID from above somehow and use in `https://www.youtube.com/watch?v=${videoID}` to post for video URL in notification message
 
     //startBot();
     //botMenu();
 
     //startLiveCheck();
 });
+
+String.prototype.replaceAt = function(index, replacement) {
+  return this.substring(0, index) + replacement + this.substring(index + replacement.length);
+}
 
 async function botMenu()
 {
