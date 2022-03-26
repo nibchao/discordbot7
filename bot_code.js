@@ -166,7 +166,7 @@ client.once("ready", () =>
     //startBot();
     //botMenu();
 
-    //startLiveCheck();
+    startLiveCheck();
 });
 
 String.prototype.replaceAt = function(index, replacement) {
