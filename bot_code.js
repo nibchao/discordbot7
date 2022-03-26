@@ -5,7 +5,7 @@ const { token, clientID, guildID } = require("./credentials/discordTestingBotCre
 
 // https://developers.google.com/youtube/v3/quickstart/nodejs
  const { google } = require('googleapis');
- let OAuth2 = google.auth.OAuth2;
+ const OAuth2 = google.auth.OAuth2;
  const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
  const SCOPES = 'https://www.googleapis.com/auth/youtube.readonly';
 
@@ -153,13 +153,14 @@ client.once("ready", () =>
     // hardcoded youtube channel url at the moment; if it's possible, try to get youtube channel url by fetching via search parameters https://developers.google.com/youtube/v3/docs/search/list?apix=true
     // https://stackoverflow.com/a/1431113
 
-    /*let ytChannelURL = 'UCSD0MKMFT0bZP4jj6c5ihMw'; // need to see what happens when user has custom channel URL
+    let ytChannelURL = 'UCSD0MKMFT0bZP4jj6c5ihMw'; // need to see what happens when user has custom channel URL
     console.log(ytChannelURL);
     let latestVideoURL = '';
     latestVideoURL = ytChannelURL.replaceAt(1, 'U'); // replacing the C with a U makes the playlist request work for some reason
     console.log(latestVideoURL);
 
-    let googleURLTemp = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${latestVideoURL}&maxResults=1&key=${youtubeCredentials.api_key}`;*/
+    let googleURLTemp = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${latestVideoURL}&maxResults=1&key=${youtubeCredentials.installed.api_key}`;
+    console.log(googleURLTemp);
     //console.log(googleURLTemp.items.snippet.resourceId.videoId); // need to somehow access the contents in the URL instead of accessing the actual URL
     // then get videoID from above somehow and use in `https://www.youtube.com/watch?v=${videoID}` to post for video URL in notification message
 
