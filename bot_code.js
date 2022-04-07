@@ -46,7 +46,7 @@ const client = new Client
 
 // https://stackoverflow.com/a/18818533
 require('console-stamp')(console, { 
-  format: ':date(HH:MM:ss)' 
+	format: ':date(yyyy/mm/dd HH:MM:ss)' 
 } );
 //
 
