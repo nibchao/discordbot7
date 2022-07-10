@@ -22,6 +22,7 @@ const readline = require('readline');
 const menuCommands = require('./commands/botMenu/menuFunctions.js');
 const { resolve } = require("path");
 const { memoryUsage } = require("process");
+const { connect } = require("http2");
 //
 
 const commandPrefix = '!';
@@ -130,45 +131,45 @@ client.once("ready", () =>
       console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.\n');
     }
 
-    if (roleMessageIDArray[0] === undefined)
+    let roleMessage = '', roleMessageLength = 0;
+    roleChannel.messages.fetch(roleMessageIDArray[1]).then((message) => // make this iterate through the entire IDArray instead of just index 1 then finally do the bottom if-elif-else statements
     {
-        let counter = 0;
-        roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-        \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-        \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-        \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-        \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-        \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-        \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
-        sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-        sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
-        sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')).then(() =>
-        fs.appendFileSync(`./${roleMessageIDFile}`, `${roleMessageID}`, {encoding:'utf8'})); });
-    }
-    else
-    {
-      roleMessageID = roleMessageIDArray[0];
-    }
-
-    // hardcoded youtube channel url at the moment; if it's possible, try to get youtube channel url by fetching via search parameters https://developers.google.com/youtube/v3/docs/search/list?apix=true
-    // https://stackoverflow.com/a/1431113
-
-    /*let ytChannelURL = 'UCSD0MKMFT0bZP4jj6c5ihMw'; // need to see what happens when user has custom channel URL
-    console.log(ytChannelURL);
-    let latestVideoURL = '';
-    latestVideoURL = ytChannelURL.replaceAt(1, 'U'); // replacing the C with a U makes the playlist request work for some reason
-    console.log(latestVideoURL);
-
-    let googleURLTemp = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${latestVideoURL}&maxResults=1&key=${youtubeCredentials.installed.api_key}`;
-    console.log(googleURLTemp);*/
-    //console.log(googleURLTemp.items.snippet.resourceId.videoId); // need to somehow access the contents in the URL instead of accessing the actual URL
-    // then get videoID from above somehow and use in `https://www.youtube.com/watch?v=${videoID}` to post for video URL in notification message
-
+      roleMessage = message;
+      roleMessageLength = message.content.length;
+      console.log(roleMessageLength);
+    }).catch(error => console.log(error)).then(() => 
+    { 
+      if (roleMessageIDArray.length === 0) // if text file is empty -> make message + store id
+      {
+          console.log(`${roleMessageIDFile} was empty\n`);
+          return;
+          let counter = 0;
+          roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+          \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+          \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+          \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+          \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+          \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+          \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+          sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
+          sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
+          sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('Failed to react with emoji.')).then(() =>
+          fs.appendFileSync(`./${roleMessageIDFile}`, `${roleMessageID}`, {encoding:'utf8'})); });
+      }
+      else if (roleMessageIDArray.length !== 0 && roleMessageLength === 0) // if text file is not empty but does not contain the message id -> make message + store id
+      {
+        console.log('make message + store id');
+      }
+      else // if text file is not empty and contains the message id -> do nothing
+      {
+        console.log('do nothing');
+      }
+    });
 
     //startBot();
     //botMenu();
 
-    startLiveCheck();
+    //startLiveCheck();
 });
 
 String.prototype.replaceAt = function(index, replacement) {
@@ -270,7 +271,7 @@ readline.createInterface // https://stackoverflow.com/a/12299566
 ).on('line', function(line)
 {
   let lineNoMarkDown = '';
-  lineNoMarkDown = line.replaceAll('_',  '*_*');
+  lineNoMarkDown = line.replaceAll('_',  '\\_');
   streamersNoMarkDown.push(lineNoMarkDown);
   streamers.push(line);
 });
@@ -545,3 +546,17 @@ client.on('interactionCreate', async interaction =>
   }
 });
 */
+
+// hardcoded youtube channel url at the moment; if it's possible, try to get youtube channel url by fetching via search parameters https://developers.google.com/youtube/v3/docs/search/list?apix=true
+    // https://stackoverflow.com/a/1431113
+
+    /*let ytChannelURL = 'UCSD0MKMFT0bZP4jj6c5ihMw'; // need to see what happens when user has custom channel URL
+    console.log(ytChannelURL);
+    let latestVideoURL = '';
+    latestVideoURL = ytChannelURL.replaceAt(1, 'U'); // replacing the C with a U makes the playlist request work for some reason
+    console.log(latestVideoURL);
+
+    let googleURLTemp = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${latestVideoURL}&maxResults=1&key=${youtubeCredentials.installed.api_key}`;
+    console.log(googleURLTemp);*/
+    //console.log(googleURLTemp.items.snippet.resourceId.videoId); // need to somehow access the contents in the URL instead of accessing the actual URL
+    // then get videoID from above somehow and use in `https://www.youtube.com/watch?v=${videoID}` to post for video URL in notification message
