@@ -104,11 +104,13 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
             url: uniqueThumbnail,
         }
     };
-    let noDiscordMarkdownUsername = '';
-    noDiscordMarkdownUsername = displayName.replaceAll('_', '*_*');
+    let noDiscordMarkdownDisplayName = ''; // this is the text that displays if you go on the user's profile page
+    noDiscordMarkdownDisplayName = displayName.replaceAll('_', '\\_');
+    let noDiscordMarkdownStreamerUsername = ''; // this is the username portion of the URL on the user's profile page
+    noDiscordMarkdownStreamerUsername = streamerUsername.replaceAll('_', '\\_');
     if (streamerUsername === 'ekun7')
     {
-        announceChannel.send({content:`Hey @everyone ${noDiscordMarkdownUsername} is now live! https://www.twitch.tv/${streamerUsername}/`, embeds: [liveNotificationEmbed]}); 
+        announceChannel.send({content:`Hey @everyone ${noDiscordMarkdownDisplayName} is now live! https://www.twitch.tv/${noDiscordMarkdownStreamerUsername}/`, embeds: [liveNotificationEmbed]}); 
     }
     else
     {
@@ -118,6 +120,6 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
         {
             return;
         }
-        announceChannel.send({content:`Hey ${roleID} ${noDiscordMarkdownUsername} is now live! https://www.twitch.tv/${streamerUsername}/`, embeds: [liveNotificationEmbed]}); 
+        announceChannel.send({content:`Hey ${roleID} ${noDiscordMarkdownDisplayName} is now live! https://www.twitch.tv/${noDiscordMarkdownStreamerUsername}/`, embeds: [liveNotificationEmbed]}); 
     }
 };
