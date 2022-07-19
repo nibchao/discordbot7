@@ -5,7 +5,7 @@ const { token, clientID, guildID } = require("./credentials/discordCredentials.j
 
 // https://developers.google.com/youtube/v3/quickstart/nodejs
  const { google } = require('googleapis');
- let OAuth2 = google.auth.OAuth2;
+ const OAuth2 = google.auth.OAuth2;
  const youtubeCredentials = require(`./credentials/youtubeCredentials.json`);
  const SCOPES = 'https://www.googleapis.com/auth/youtube.readonly';
 
@@ -22,6 +22,7 @@ const readline = require('readline');
 const menuCommands = require('./commands/botMenu/menuFunctions.js');
 const { resolve } = require("path");
 const { memoryUsage } = require("process");
+const { connect } = require("http2");
 //
 
 const commandPrefix = '!';
@@ -268,7 +269,7 @@ readline.createInterface // https://stackoverflow.com/a/12299566
 ).on('line', function(line)
 {
   let lineNoMarkDown = '';
-  lineNoMarkDown = line.replaceAll('_',  '*_*');
+  lineNoMarkDown = line.replaceAll('_',  '\\_');
   streamersNoMarkDown.push(lineNoMarkDown);
   streamers.push(line);
 });
