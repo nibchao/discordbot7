@@ -21,7 +21,7 @@ const readline = require('readline');
 // botMenu
 const menuCommands = require('./commands/botMenu/menuFunctions.js');
 const { resolve } = require("path");
-const { memoryUsage } = require("process");
+const { memoryUsage, exit } = require("process");
 const { connect } = require("http2");
 //
 
@@ -46,9 +46,10 @@ const client = new Client
 });
 
 // https://stackoverflow.com/a/18818533, https://www.npmjs.com/package/console-stamp
-require('console-stamp')(console, { 
+require('console-stamp')(console, 
+{ 
   format: ':date(yyyy/mm/dd HH:MM:ss)' 
-} );
+});
 //
 
 // YOUTUBE NOTIFICATION IDEA
@@ -57,10 +58,9 @@ require('console-stamp')(console, {
 let currentGuild = '', announceChannel = '', roleMessageID = '', roleChannel = '', connectedGuildName = '';
 client.once("ready", () =>
 {
-    console.log(`Connected as ${client.user.tag}`);
     currentGuild = client.guilds.cache.get(guildID);
     connectedGuildName = currentGuild.name;
-    console.log(connectedGuildName);
+    console.log(`Connected as ${client.user.tag} to ${connectedGuildName}`);
     console.log('---------------------------');
 
     announceChannel = currentGuild.channels.cache.find(channel => channel.name === 'announce');
@@ -103,18 +103,18 @@ client.once("ready", () =>
         console.log(`${roleMessageIDFile} was ` + '\x1b[32m%s\x1b[0m', 'created\x1b[0m' + ' in bot_code.js directory.\n');
       });
     }
-
+    
     // https://discord.js.org/#/docs/discord.js/stable/class/RoleManager?scrollTo=create
     console.log(`Checking ${streamerList} for any missing roles.`);
     let roleCheck = '', roleCheckCount = 0;
-    for (let cnt = 0; cnt < streamers.length; cnt++)
+    for (const streamersCnt of streamers)
     {
-        roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamers[cnt]} ${notificationRoleSuffix}`);
+        roleCheck = currentGuild.roles.cache.find(role => role.name === `${streamersCnt} ${notificationRoleSuffix}`);
         if (roleCheck === undefined)
         {
-          console.log(`${streamers[cnt]} ${notificationRoleSuffix} was ` + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ', ' + '\x1b[32mcreating\x1b[0m' + ` a Discord role for ${streamers[cnt]}.`);
+          console.log(`${streamersCnt} ${notificationRoleSuffix} was ` + '\x1b[35m%s\x1b[0m', 'missing\x1b[0m' + ', ' + '\x1b[32mcreating\x1b[0m' + ` a Discord role for ${streamersCnt}.`);
           currentGuild.roles.create({
-            name: `${streamers[cnt]} ${notificationRoleSuffix}`,
+            name: `${streamersCnt} ${notificationRoleSuffix}`,
             //color: 'BLUE',
             //reason: 'testing bot creating roles',
           }).catch(console.error);
@@ -126,23 +126,13 @@ client.once("ready", () =>
     }
 
     // if number of checked roles equals number of streamerList.txt roles, then all roles exist
-    if (roleCheckCount == streamers.length)
+    if (roleCheckCount === streamers.length)
     {
       console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.\n');
     }
 
-    let roleMessage = '', roleMessageLength = 0;
-    roleChannel.messages.fetch(roleMessageIDArray[1]).then((message) => // make this iterate through the entire IDArray instead of just index 1 then finally do the bottom if-elif-else statements
+    if (roleMessageIDArray.length === 0) // if text file is empty -> make message + store id
     {
-      roleMessage = message;
-      roleMessageLength = message.content.length;
-      console.log(roleMessageLength);
-    }).catch(error => console.log(error)).then(() => 
-    { 
-      if (roleMessageIDArray.length === 0) // if text file is empty -> make message + store id
-      {
-          console.log(`${roleMessageIDFile} was empty\n`);
-          return;
           let counter = 0;
           roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
           \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
@@ -155,16 +145,56 @@ client.once("ready", () =>
           sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
           sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('Failed to react with emoji.')).then(() =>
           fs.appendFileSync(`./${roleMessageIDFile}`, `${roleMessageID}`, {encoding:'utf8'})); });
+    }
+    else
+    {
+      // need to address the case if multiple copies of the same message ID are in the roleMessageID.txt for whatever reason
+      // also if there are empty lines
+      // make this a function and use the return value of the function to proceed for whether to make a new message or not (below commented code section)
+      let foundMessage = false;
+      for (let i = 0; i < roleMessageIDArray.length; i++) // should make runtime faster than O(n^2)
+      {    
+        roleChannel.messages.fetch(roleMessageIDArray[i]).then(message =>
+        {
+            for (let j = 0; j < roleMessageIDArray.length; j++)
+            {
+              if (message.id === roleMessageIDArray[j])
+              {
+                console.log(`${roleMessageIDArray[i]} was found. Skipped creating role message.`);
+                foundMessage = true;
+                break;
+              }
+            }
+        }).catch(() => 
+        {
+        if (!foundMessage) 
+        {
+          console.log(`${roleMessageIDArray[i]} was not found.`);
+        }
+        else // this fails to run for some reason if the found message isn't the first line in .txt
+        { 
+          //console.log('exited');
+          return;
+        }});
       }
-      else if (roleMessageIDArray.length !== 0 && roleMessageLength === 0) // if text file is not empty but does not contain the message id -> make message + store id
-      {
-        console.log('make message + store id');
-      }
-      else // if text file is not empty and contains the message id -> do nothing
-      {
-        console.log('do nothing');
-      }
-    });
+    }
+
+    // let roleMessage = '', roleMessageLength = 0;
+    // roleChannel.messages.fetch(roleMessageIDArray[1]).then((message) => // make this iterate through the entire IDArray instead of just index 1 then finally do the bottom if-elif-else statements
+    // {
+    //   roleMessage = message;
+    //   roleMessageLength = message.content.length;
+    // }).catch(console.error).then(() => 
+    // { 
+    //   if (roleMessageIDArray.length !== 0 && roleMessageLength === 0) // if text file is not empty but does not contain the message id -> make message + store id
+    //   {
+    //     console.log('make message + store id');
+    //   }
+    //   else // if text file is not empty and contains the message id -> do nothing
+    //   {
+    //     console.log('do nothing');
+    //   }
+    // });
 
     //startBot();
     //botMenu();
@@ -172,7 +202,8 @@ client.once("ready", () =>
     //startLiveCheck();
 });
 
-String.prototype.replaceAt = function(index, replacement) {
+String.prototype.replaceAt = function(index, replacement) 
+{
   return this.substring(0, index) + replacement + this.substring(index + replacement.length);
 }
 
