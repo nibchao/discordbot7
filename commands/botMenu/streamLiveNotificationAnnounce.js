@@ -107,7 +107,7 @@ module.exports = async function streamLiveNotificationAnnounce(streamerUsername,
     let noDiscordMarkdownDisplayName = ''; // this is the text that displays if you go on the user's profile page
     noDiscordMarkdownDisplayName = displayName.replaceAll('_', '\\_');
     let noDiscordMarkdownStreamerUsername = ''; // this is the username portion of the URL on the user's profile page
-    noDiscordMarkdownStreamerUsername = streamerUsername.replaceAll('_', '\\_');
+    noDiscordMarkdownStreamerUsername = streamerUsername.replaceAll('_', '\_');
     if (streamerUsername === 'ekun7')
     {
         announceChannel.send({content:`Hey @everyone ${noDiscordMarkdownDisplayName} is now live! https://www.twitch.tv/${noDiscordMarkdownStreamerUsername}/`, embeds: [liveNotificationEmbed]}); 
