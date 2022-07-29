@@ -131,24 +131,63 @@ client.once("ready", () =>
       console.log(`All ${streamerList} roles were ` + '\x1b[32m%s\x1b[0m', 'found\x1b[0m' + '.\n');
     }
 
-    if (roleMessageIDArray[0] === undefined)
+    if (roleMessageIDArray.length === 0) // if text file is empty -> make message + store id
     {
-        let counter = 0;
-        roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-        \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-        \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
-        \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-        \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-        \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-        \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
-        sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
-        sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
-        sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('emoji failed to react.')).then(() =>
-        fs.appendFileSync(`./${roleMessageIDFile}`, `${roleMessageID}`, {encoding:'utf8'})); });
+          let counter = 0;
+          roleChannel.send(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+          \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+          \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+          \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+          \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+          \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+          \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`).then(sent => { roleMessageID = sent.id; sent.react("1⃣").then(() => 
+          sent.react("2⃣")).then(() => sent.react("3⃣")).then(() =>
+          sent.react("4⃣")).then(() => sent.react("5⃣")).then(() =>
+          sent.react("6⃣")).then(() => sent.react("7⃣")).catch(() => console.error('Failed to react with emoji.')).then(() =>
+          fs.appendFileSync(`./${roleMessageIDFile}`, `${roleMessageID}`, {encoding:'utf8'})); });
     }
     else
     {
-      roleMessageID = roleMessageIDArray[0];
+      // need to address the case if multiple copies of the same message ID are in the roleMessageID.txt for whatever reason
+      // also if there are empty lines
+      // make this a function and use the return value of the function to proceed for whether to make a new message or not (below commented code section)
+      let foundMessage = false;
+      for (let i = 0; i < roleMessageIDArray.length; i++) // should make runtime faster than O(n^2)
+      {    
+        roleChannel.messages.fetch(roleMessageIDArray[i]).then(message =>
+        {
+            for (let j = 0; j < roleMessageIDArray.length; j++)
+            {
+              if (message.id === roleMessageIDArray[j])
+              {
+                console.log(`${roleMessageIDArray[i]} was found. Skipped creating role message.`);
+                foundMessage = true;
+                roleMessageID = roleMessageIDArray[i];
+
+                let counter = 0;
+                message.edit(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+                \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+                \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
+                \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+                \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+                \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
+                \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`)
+                
+                break;
+              }
+            }
+        }).catch(() => 
+        {
+        if (!foundMessage) 
+        {
+          console.log(`${roleMessageIDArray[i]} was not found.`);
+        }
+        else // this fails to run for some reason if the found message isn't the first line in .txt
+        { 
+          //console.log('exited');
+          return;
+        }});
+      }
     }
 
     // hardcoded youtube channel url at the moment; if it's possible, try to get youtube channel url by fetching via search parameters https://developers.google.com/youtube/v3/docs/search/list?apix=true
