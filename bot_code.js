@@ -164,14 +164,14 @@ client.once("ready", () =>
                 foundMessage = true;
                 roleMessageID = roleMessageIDArray[i];
 
-                let counter = 0;
+                /*let counter = 0;
                 message.edit(`**${'Twitch Notification Roles'}**\n 1⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
                 \n 2⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
                 \n 3⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix} 
                 \n 4⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
                 \n 5⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
                 \n 6⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}
-                \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`)
+                \n 7⃣ ${streamersNoMarkDown[counter++]} ${notificationRoleSuffix}`)*/
                 
                 break;
               }
